@@ -3,7 +3,8 @@
 .UpdateBanner {
   position: fixed;
   top: 20px;
-  right: 20px;
+  left: calc(50% + 110px);
+  transform: translateX(-50%);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -32,11 +33,11 @@
 @keyframes updateBannerSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-16px) scale(0.96);
+    transform: translateX(-50%) translateY(-16px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%);
   }
 }
 

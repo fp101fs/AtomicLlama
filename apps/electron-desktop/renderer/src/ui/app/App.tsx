@@ -32,15 +32,22 @@ import {
 import { ExecApprovalOverlay } from "./ExecApprovalModal";
 import { usePaidStatusBridge } from "./hooks/usePaidStatusBridge";
 import { SubscriptionPromoBannerSource } from "../shared/banners/SubscriptionPromoBannerSource";
+import { UpdateBanner } from "../updates/UpdateBanner";
+import { DefenderBanner } from "../updates/DefenderBanner";
+import { AppBanners } from "../shared/banners/AppBanners";
 import a from "./App.module.css";
 
 function ChatRoute({ state }: { state: Extract<GatewayState, { kind: "ready" }> }) {
   const [searchParams] = useSearchParams();
   const session = searchParams.get("session");
-  if (session?.trim()) {
-    return <ChatPage state={state} />;
-  }
-  return <StartChatPage state={state} />;
+  return (
+    <>
+      <UpdateBanner />
+      <DefenderBanner />
+      <AppBanners />
+      {session?.trim() ? <ChatPage state={state} /> : <StartChatPage state={state} />}
+    </>
+  );
 }
 
 function SidebarLayout({ state }: { state: Extract<GatewayState, { kind: "ready" }> }) {

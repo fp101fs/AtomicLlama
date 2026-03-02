@@ -81,9 +81,9 @@ export function ConsentScreen({
 
           <div className="UiLinkContainer">
             <span>
-              Atomic Bot is experimental product. By clicking
+              Atomic Bot is an experimental product. By clicking
               <br />
-              button you agree to the{" "}
+              the button, you agree to our{" "}
               <a
                 className="UiLink UiLinkMainPage"
                 href={termsUrl}
