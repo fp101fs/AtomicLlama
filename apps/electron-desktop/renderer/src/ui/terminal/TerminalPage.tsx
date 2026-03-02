@@ -2,26 +2,8 @@ import React from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
+import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import s from "./TerminalPage.module.css";
-
-// ─── Desktop API bridge ────────────────────────────────────────────────────
-
-type TerminalApi = {
-  terminalCreate: () => Promise<{ id: string }>;
-  terminalWrite: (id: string, data: string) => Promise<void>;
-  terminalResize: (id: string, cols: number, rows: number) => Promise<void>;
-  terminalKill: (id: string) => Promise<void>;
-  terminalList: () => Promise<Array<{ id: string; alive: boolean }>>;
-  terminalGetBuffer: (id: string) => Promise<string>;
-  onTerminalData: (cb: (p: { id: string; data: string }) => void) => () => void;
-  onTerminalExit: (
-    cb: (p: { id: string; exitCode: number; signal?: number }) => void
-  ) => () => void;
-};
-
-function getApi(): TerminalApi | undefined {
-  return (window as unknown as { openclawDesktop?: TerminalApi }).openclawDesktop;
-}
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -68,7 +50,7 @@ function TerminalPane({ terminalId, visible }: { terminalId: string; visible: bo
   // Set up xterm + connect to PTY on mount; dispose on unmount.
   React.useEffect(() => {
     const el = containerRef.current;
-    const api = getApi();
+    const api = getDesktopApiOrNull();
     if (!el || !api) {
       return;
     }
@@ -150,7 +132,7 @@ function TerminalPane({ terminalId, visible }: { terminalId: string; visible: bo
       return;
     }
     requestAnimationFrame(() => {
-      const api = getApi();
+      const api = getDesktopApiOrNull();
       const fitAddon = fitAddonRef.current;
       const term = termRef.current;
       if (fitAddon && term) {
@@ -175,17 +157,14 @@ function TerminalPane({ terminalId, visible }: { terminalId: string; visible: bo
 
 // ─── Main terminal page with tabs ──────────────────────────────────────────
 
-let nextTabNumber = 1;
-
 export function TerminalPage() {
   const [tabs, setTabs] = React.useState<TabInfo[]>([]);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [ready, setReady] = React.useState(false);
+  const nextTabNumberRef = React.useRef(1);
 
-  // On mount: fetch existing terminal sessions from the main process.
-  // If none exist, auto-create the first tab.
   React.useEffect(() => {
-    const api = getApi();
+    const api = getDesktopApiOrNull();
     if (!api) {
       return;
     }
@@ -198,22 +177,20 @@ export function TerminalPage() {
       }
 
       if (existing.length > 0) {
-        // Restore tabs from existing sessions.
         const restored = existing.map((t, i) => ({
           id: t.id,
           label: `Terminal ${i + 1}`,
           alive: t.alive,
         }));
-        nextTabNumber = existing.length + 1;
+        nextTabNumberRef.current = existing.length + 1;
         setTabs(restored);
         setActiveId(restored[0].id);
       } else {
-        // Create the first terminal.
         const { id } = await api.terminalCreate();
         if (!alive) {
           return;
         }
-        const tab: TabInfo = { id, label: `Terminal ${nextTabNumber++}`, alive: true };
+        const tab: TabInfo = { id, label: `Terminal ${nextTabNumberRef.current++}`, alive: true };
         setTabs([tab]);
         setActiveId(id);
       }
@@ -226,9 +203,8 @@ export function TerminalPage() {
     };
   }, []);
 
-  // Listen for PTY exits to mark tabs as dead.
   React.useEffect(() => {
-    const api = getApi();
+    const api = getDesktopApiOrNull();
     if (!api) {
       return;
     }
@@ -239,19 +215,19 @@ export function TerminalPage() {
   }, []);
 
   const handleNewTab = React.useCallback(async () => {
-    const api = getApi();
+    const api = getDesktopApiOrNull();
     if (!api) {
       return;
     }
     const { id } = await api.terminalCreate();
-    const tab: TabInfo = { id, label: `Terminal ${nextTabNumber++}`, alive: true };
+    const tab: TabInfo = { id, label: `Terminal ${nextTabNumberRef.current++}`, alive: true };
     setTabs((prev) => [...prev, tab]);
     setActiveId(id);
   }, []);
 
   const handleCloseTab = React.useCallback(
     (closedId: string) => {
-      const api = getApi();
+      const api = getDesktopApiOrNull();
       if (api) {
         void api.terminalKill(closedId);
       }

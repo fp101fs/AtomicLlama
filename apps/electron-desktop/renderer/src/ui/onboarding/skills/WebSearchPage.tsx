@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 import {
   GlassCard,
   HeroPageLayout,
@@ -119,7 +119,7 @@ export function WebSearchPage(props: {
                   if (!url) {
                     return;
                   }
-                  void getDesktopApiOrNull()?.openExternal(url);
+                  openExternal(url);
                 }}
               >
                 Learn more ↗

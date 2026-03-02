@@ -78,23 +78,23 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
   const flowStatus = flow === "paid" ? paid.skillStatus : welcome.status;
   const flowError = flow === "paid" ? paid.skillError : welcome.error;
 
-  const skillsOnBack = flow === "paid" ? paid.goPaidModelSelect : welcome.goModelSelect;
+  const skillsOnBack = flow === "paid" ? paid.nav.goPaidModelSelect : welcome.goModelSelect;
   const connectionsFinish = React.useCallback(() => {
     if (flow === "paid") {
-      void paid.onPaidConnectionsContinue();
+      void paid.flow.onPaidConnectionsContinue();
     } else {
       welcome.finish();
     }
-  }, [flow, paid.onPaidConnectionsContinue, welcome.finish]);
+  }, [flow, paid.flow.onPaidConnectionsContinue, welcome.finish]);
 
   const goMediaUnderstanding =
-    flow === "paid" ? paid.goPaidMediaUnderstanding : welcome.goMediaUnderstanding;
-  const goObsidianConnect = flow === "paid" ? paid.goObsidian : welcome.goObsidian;
+    flow === "paid" ? paid.nav.goPaidMediaUnderstanding : welcome.goMediaUnderstanding;
+  const goObsidianConnect = flow === "paid" ? paid.nav.goObsidian : welcome.goObsidian;
   const goSlackFromSkills =
-    flow === "paid" ? paid.goPaidSlackFromSkills : welcome.goSlackFromSkills;
+    flow === "paid" ? paid.nav.goPaidSlackFromSkills : welcome.goSlackFromSkills;
   const goSlackFromConnections =
-    flow === "paid" ? paid.goPaidSlackFromConnections : welcome.goSlackFromConnections;
-  const goSlackBack = flow === "paid" ? paid.goPaidSlackBack : welcome.goSlackBack;
+    flow === "paid" ? paid.nav.goPaidSlackFromConnections : welcome.goSlackFromConnections;
+  const goSlackBack = flow === "paid" ? paid.nav.goPaidSlackBack : welcome.goSlackBack;
 
   return (
     <OnboardingFlowContext.Provider value={flow}>
@@ -122,7 +122,7 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
               onSelect={(mode) => {
                 if (mode === "paid") {
                   setFlow("paid");
-                  void paid.startGoogleAuth();
+                  void paid.auth.startGoogleAuth();
                 } else {
                   setFlow("self-managed");
                   void dispatch(clearAuth());
@@ -131,10 +131,10 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
               }}
               onStartGoogleAuth={() => {
                 setFlow("paid");
-                void paid.startGoogleAuth();
+                void paid.auth.startGoogleAuth();
               }}
-              authBusy={paid.authBusy}
-              authError={paid.authError}
+              authBusy={paid.auth.busy}
+              authError={paid.auth.error}
               onBack={() => void navigate(routes.consent)}
             />
           }
@@ -147,13 +147,13 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
             <ModelSelectPage
               totalSteps={PAID_FLOW.totalSteps}
               activeStep={PAID_FLOW.steps.model}
-              models={paid.models}
+              models={paid.model.models}
               filterProvider="openrouter"
-              loading={paid.modelsLoading}
-              error={paid.modelsError}
-              onSelect={(modelId) => void paid.onPaidModelSelect(modelId)}
-              onBack={paid.goSetupMode}
-              onRetry={() => void paid.loadModels()}
+              loading={paid.model.modelsLoading}
+              error={paid.model.modelsError}
+              onSelect={(modelId) => void paid.model.onSelect(modelId)}
+              onBack={paid.nav.goSetupMode}
+              onRetry={() => void paid.model.loadModels()}
             />
           }
         />
@@ -164,17 +164,17 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
             <SetupReviewPage
               totalSteps={PAID_FLOW.totalSteps}
               activeStep={PAID_FLOW.steps.review}
-              selectedModel={paid.selectedModelName ?? paid.selectedModel ?? "GPT-5.2 Pro"}
-              subscriptionPrice={paid.subscriptionPrice}
-              onPay={() => void paid.onPay()}
-              onBack={paid.goPaidModelSelect}
-              busy={paid.payBusy}
-              paymentPending={paid.paymentPending}
-              autoTopUp={paid.autoTopUp}
-              autoTopUpLoading={paid.autoTopUpLoading}
-              autoTopUpSaving={paid.autoTopUpSaving}
-              autoTopUpError={paid.autoTopUpError}
-              onAutoTopUpPatch={paid.onAutoTopUpPatch}
+              selectedModel={paid.model.selectedName ?? paid.model.selected ?? "GPT-5.2 Pro"}
+              subscriptionPrice={paid.pay.subscriptionPrice}
+              onPay={() => void paid.pay.onPay()}
+              onBack={paid.nav.goPaidModelSelect}
+              busy={paid.pay.busy}
+              paymentPending={paid.pay.pending}
+              autoTopUp={paid.billing.autoTopUp}
+              autoTopUpLoading={paid.billing.autoTopUpLoading}
+              autoTopUpSaving={paid.billing.autoTopUpSaving}
+              autoTopUpError={paid.billing.autoTopUpError}
+              onAutoTopUpPatch={paid.billing.onAutoTopUpPatch}
               onError={addToastError}
             />
           }
@@ -183,8 +183,11 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
         <Route
           path="success"
           element={
-            paid.jwt ? (
-              <SuccessPage jwt={paid.jwt} onStartChat={(key) => void paid.onStartChat(key)} />
+            paid.auth.jwt ? (
+              <SuccessPage
+                jwt={paid.auth.jwt}
+                onStartChat={(key) => void paid.flow.onStartChat(key)}
+              />
             ) : (
               <Navigate to={`${routes.welcome}/setup-mode`} replace />
             )

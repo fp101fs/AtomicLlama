@@ -18,8 +18,8 @@ import {
   createAddonCheckout,
   fetchAutoTopUpSettings,
   patchAutoTopUpSettings,
-  DEFAULT_AUTO_TOP_UP_SETTINGS,
 } from "./authSlice";
+import { DEFAULT_AUTO_TOP_UP_SETTINGS } from "./auth-types";
 import { configReducer } from "../configSlice";
 
 // ── localStorage shim ───────────────────────────────────────────────────────

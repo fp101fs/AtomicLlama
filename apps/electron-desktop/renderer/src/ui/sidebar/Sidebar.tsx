@@ -8,34 +8,8 @@ import { addToastError } from "@shared/toast";
 import { SplashLogo } from "@shared/kit";
 import { SessionSidebarItem } from "./SessionSidebarItem";
 import { cleanDerivedTitle } from "../chat/hooks/messageParser";
+import { useTerminalSidebarVisible } from "@shared/hooks/useTerminalSidebarVisible";
 import css from "./Sidebar.module.css";
-
-const TERMINAL_SIDEBAR_KEY = "terminal-sidebar-visible";
-
-/** Reads localStorage + listens for cross-component changes from OtherTab toggle. */
-function useTerminalSidebarVisible(): boolean {
-  const [visible, setVisible] = React.useState(() => {
-    try {
-      return localStorage.getItem(TERMINAL_SIDEBAR_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
-
-  React.useEffect(() => {
-    const handler = () => {
-      try {
-        setVisible(localStorage.getItem(TERMINAL_SIDEBAR_KEY) === "1");
-      } catch {
-        // ignore
-      }
-    };
-    window.addEventListener("terminal-sidebar-changed", handler);
-    return () => window.removeEventListener("terminal-sidebar-changed", handler);
-  }, []);
-
-  return visible;
-}
 
 type SessionsListResult = {
   ts: number;
@@ -95,7 +69,7 @@ export function Sidebar() {
   const currentSessionKey = searchParams.get("session") ?? null;
   const gw = useGatewayRpc();
   const { optimistic: optimisticFromContext, setOptimistic } = useOptimisticSession();
-  const showTerminal = useTerminalSidebarVisible();
+  const [showTerminal] = useTerminalSidebarVisible();
   const optimisticFromState =
     (location.state as { optimisticNewSession?: OptimisticSession } | null)?.optimisticNewSession ??
     null;

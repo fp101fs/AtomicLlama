@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { useGatewayRpc } from "@gateway/context";
+import { openExternal } from "@shared/utils/openExternal";
 import { ActionButton } from "@shared/kit";
 import { errorToMessage } from "@shared/toast";
 import type { ModelProviderInfo } from "@shared/models/providers";
@@ -154,7 +155,7 @@ export function OAuthModalContent(props: {
             onClick={(e) => {
               e.preventDefault();
               if (provider.helpUrl) {
-                void getDesktopApiOrNull()?.openExternal(provider.helpUrl);
+                openExternal(provider.helpUrl);
               }
             }}
           >

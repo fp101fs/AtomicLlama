@@ -16,34 +16,11 @@ import { errorToMessage, addToastError } from "@shared/toast";
 import { routes } from "../app/routes";
 import { settingsStyles as ps } from "./SettingsPage";
 import { Modal } from "@shared/kit";
+import { openExternal } from "@shared/utils/openExternal";
+import { useTerminalSidebarVisible } from "@shared/hooks/useTerminalSidebarVisible";
 import { RestoreBackupModal } from "./RestoreBackupModal";
 import s from "./OtherTab.module.css";
 import pkg from "../../../../package.json";
-
-const TERMINAL_SIDEBAR_KEY = "terminal-sidebar-visible";
-
-export function useTerminalSidebarVisible(): [boolean, (v: boolean) => void] {
-  const [visible, setVisible] = React.useState(() => {
-    try {
-      return localStorage.getItem(TERMINAL_SIDEBAR_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
-
-  const toggle = React.useCallback((v: boolean) => {
-    setVisible(v);
-    try {
-      localStorage.setItem(TERMINAL_SIDEBAR_KEY, v ? "1" : "0");
-    } catch {
-      // ignore
-    }
-    // Notify other components (Sidebar) that are already mounted.
-    window.dispatchEvent(new Event("terminal-sidebar-changed"));
-  }, []);
-
-  return [visible, toggle];
-}
 
 export function OtherTab({ onError }: { onError: (msg: string | null) => void }) {
   const [launchAtStartup, setLaunchAtStartup] = React.useState(false);
@@ -234,7 +211,7 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
               type="button"
               className={s.UiSettingsOtherLink}
               onClick={() =>
-                void api?.openExternal("https://polyformproject.org/licenses/noncommercial/1.0.0")
+                openExternal("https://polyformproject.org/licenses/noncommercial/1.0.0")
               }
             >
               PolyForm Noncommercial 1.0.0
@@ -259,35 +236,35 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
           <button
             type="button"
             className={s.UiSettingsOtherFooterLink}
-            onClick={() => void api?.openExternal("https://github.com/AtomicBot-ai/atomicbot")}
+            onClick={() => openExternal("https://github.com/AtomicBot-ai/atomicbot")}
           >
             GitHub
           </button>
           <button
             type="button"
             className={s.UiSettingsOtherFooterLink}
-            onClick={() => void api?.openExternal("https://atomicbot.ai")}
+            onClick={() => openExternal("https://atomicbot.ai")}
           >
             Website
           </button>
           <button
             type="button"
             className={s.UiSettingsOtherFooterLink}
-            onClick={() => void api?.openExternal("https://x.com/atomicbot_ai")}
+            onClick={() => openExternal("https://x.com/atomicbot_ai")}
           >
             X
           </button>
           <button
             type="button"
             className={s.UiSettingsOtherFooterLink}
-            onClick={() => void api?.openExternal("https://www.instagram.com/atomicbot.ai/")}
+            onClick={() => openExternal("https://www.instagram.com/atomicbot.ai/")}
           >
             Instagram
           </button>
           <button
             type="button"
             className={s.UiSettingsOtherFooterLink}
-            onClick={() => void api?.openExternal("https://discord.gg/2TXafRV69m")}
+            onClick={() => openExternal("https://discord.gg/2TXafRV69m")}
           >
             Discord
           </button>

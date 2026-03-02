@@ -1,7 +1,7 @@
 import React from "react";
 
 import gw from "../GoogleWorkspace.module.css";
-import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 
 /** Collapsible step-by-step instructions for Slack onboarding. */
 export function SlackSetupInstructions() {
@@ -23,7 +23,7 @@ export function SlackSetupInstructions() {
           className="UiLink"
           onClick={(e) => {
             e.preventDefault();
-            void getDesktopApiOrNull()?.openExternal("https://docs.openclaw.ai/slack");
+            openExternal("https://docs.openclaw.ai/slack");
           }}
         >
           Slack setup ↗

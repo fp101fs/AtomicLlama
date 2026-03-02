@@ -1,7 +1,7 @@
 import React from "react";
 
 import gw from "../connections/GoogleWorkspace.module.css";
-import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 import { GlassCard, HeroPageLayout, PrimaryButton, TextInput } from "@shared/kit";
 import { DEFAULT_GOG_SERVICES } from "../hooks/constants";
 import { UiCheckbox } from "@shared/kit/forms";
@@ -122,7 +122,7 @@ export function GogPage(props: {
                 className="UiLink"
                 onClick={(e) => {
                   e.preventDefault();
-                  void getDesktopApiOrNull()?.openExternal("https://accounts.google.com/");
+                  openExternal("https://accounts.google.com/");
                 }}
               >
                 Open Google ↗

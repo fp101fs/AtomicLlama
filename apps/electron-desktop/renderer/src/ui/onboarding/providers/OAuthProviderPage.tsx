@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 import { GlassCard, HeroPageLayout, OnboardingDots, PrimaryButton } from "@shared/kit";
 import { errorToMessage } from "@shared/toast";
 import { MODEL_PROVIDER_BY_ID, type ModelProvider } from "@shared/models/providers";
@@ -112,7 +113,7 @@ export function OAuthProviderPage(props: {
                 e.preventDefault();
                 const url = meta.helpUrl;
                 if (url) {
-                  void getDesktopApiOrNull()?.openExternal(url);
+                  openExternal(url);
                 }
               }}
             >

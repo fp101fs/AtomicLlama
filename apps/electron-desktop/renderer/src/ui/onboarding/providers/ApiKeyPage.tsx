@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 import { GlassCard, HeroPageLayout, OnboardingDots, PrimaryButton, TextInput } from "@shared/kit";
 import type { Provider } from "./ProviderSelectPage";
 import { MODEL_PROVIDER_BY_ID } from "@shared/models/providers";
@@ -141,7 +142,7 @@ export function ApiKeyPage(props: {
                     if (!url) {
                       return;
                     }
-                    void getDesktopApiOrNull()?.openExternal(url);
+                    openExternal(url);
                   }}
                 >
                   Get API key ↗
@@ -177,9 +178,7 @@ export function ApiKeyPage(props: {
                 className="UiLink"
                 onClick={(e) => {
                   e.preventDefault();
-                  void getDesktopApiOrNull()?.openExternal(
-                    "https://docs.anthropic.com/en/docs/claude-code/setup-token"
-                  );
+                  openExternal("https://docs.anthropic.com/en/docs/claude-code/setup-token");
                 }}
               >
                 Learn more ↗

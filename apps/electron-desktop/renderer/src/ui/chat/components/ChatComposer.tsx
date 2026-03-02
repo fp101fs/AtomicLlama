@@ -2,13 +2,10 @@ import React from "react";
 import type { ChatAttachmentInput } from "@store/slices/chat/chatSlice";
 import type { DownloadStatus } from "@store/slices/whisperSlice";
 import { ChatAttachmentCard, getFileTypeLabel } from "./ChatAttachmentCard";
+import { WhisperDownloadTooltip } from "./WhisperDownloadTooltip";
 import { MicrophoneIcon, SendIcon } from "@shared/kit/icons";
-import {
-  dataUrlDecodedBytes,
-  MAX_ATTACHMENTS_DEFAULT,
-  MAX_FILE_SIZE_BYTES,
-  MAX_TOTAL_ATTACHMENTS_BYTES,
-} from "../utils/file-limits";
+import { MAX_ATTACHMENTS_DEFAULT } from "../utils/file-limits";
+import { useFileAttachments } from "../hooks/useFileAttachments";
 import s from "./ChatComposer.module.css";
 
 export type ChatComposerRef = { focusInput: () => void };
@@ -22,27 +19,21 @@ export type ChatComposerProps = {
   ) => void;
   onSend: () => void;
   disabled?: boolean;
-  /** When true, show stop button instead of send; requires onStop. */
   streaming?: boolean;
   onStop?: () => void;
   sendLabel?: string;
   sendingLabel?: string;
   stopLabel?: string;
   placeholder?: string;
-  /** Max attachments (default 5). When exceeded, onAttachmentsLimitError is called. */
   maxAttachments?: number;
   onAttachmentsLimitError?: (message: string) => void;
-  /** Voice recording state */
   isVoiceRecording?: boolean;
   isVoiceProcessing?: boolean;
   onVoiceStart?: () => void;
   onVoiceStop?: () => void;
-  /** When true, clicking mic shows a "not configured" tooltip instead of recording. */
   voiceNotConfigured?: boolean;
   onNavigateVoiceSettings?: () => void;
-  /** Whisper model download status from Redux store. */
   whisperDownload?: DownloadStatus;
-  /** Trigger whisper model download (small). */
   onWhisperDownload?: () => void;
 };
 
@@ -68,7 +59,6 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
       onVoiceStart,
       onVoiceStop,
       voiceNotConfigured = false,
-      onNavigateVoiceSettings,
       whisperDownload,
       onWhisperDownload,
     },
@@ -79,14 +69,26 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
     const [showMicTooltip, setShowMicTooltip] = React.useState(false);
     const micTooltipRef = React.useRef<HTMLDivElement | null>(null);
 
+    const refocusTextarea = React.useCallback(() => {
+      textareaRef.current?.focus();
+    }, []);
+
+    const { onFileChange, removeAttachment, onDrop, onDragOver } = useFileAttachments({
+      attachments,
+      maxAttachments,
+      onAttachmentsChange,
+      onAttachmentsLimitError,
+      onFilesAdded: refocusTextarea,
+    });
+
     React.useEffect(() => {
       if (!isVoiceRecording || voiceNotConfigured) return;
       const handleGlobalMouseUp = () => onVoiceStop?.();
       window.addEventListener("mouseup", handleGlobalMouseUp);
       return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
     }, [isVoiceRecording, voiceNotConfigured, onVoiceStop]);
-    const prevDownloadKindRef = React.useRef(whisperDownload?.kind);
 
+    const prevDownloadKindRef = React.useRef(whisperDownload?.kind);
     React.useEffect(() => {
       const prev = prevDownloadKindRef.current;
       prevDownloadKindRef.current = whisperDownload?.kind;
@@ -134,120 +136,6 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
     React.useLayoutEffect(() => {
       adjustTextareaHeight();
     }, [value, adjustTextareaHeight]);
-
-    const addFiles = React.useCallback(
-      (files: FileList | File[]) => {
-        const fileArray = Array.from(files);
-        if (!fileArray.length) {
-          return;
-        }
-
-        const currentCount = attachments.length;
-        const currentTotalBytes = attachments.reduce(
-          (sum, a) => sum + dataUrlDecodedBytes(a.dataUrl),
-          0
-        );
-        if (currentCount >= maxAttachments) {
-          onAttachmentsLimitError?.(
-            `Maximum ${maxAttachments} attachment${maxAttachments === 1 ? "" : "s"} allowed.`
-          );
-          return;
-        }
-
-        const add: ChatAttachmentInput[] = [];
-        let addedBytes = 0;
-        const maxNewCount = maxAttachments - currentCount;
-        let totalSizeShown = false;
-        let oversizedShown = false;
-
-        let expectedCount = 0;
-        for (let i = 0; i < fileArray.length && expectedCount < maxNewCount; i += 1) {
-          const file = fileArray[i];
-          if (file.size > MAX_FILE_SIZE_BYTES) {
-            if (!oversizedShown) {
-              oversizedShown = true;
-              onAttachmentsLimitError?.("File is too large. Maximum size per file is 5MB.");
-            }
-            continue;
-          }
-          const wouldTotal = currentTotalBytes + addedBytes + file.size;
-          if (wouldTotal > MAX_TOTAL_ATTACHMENTS_BYTES) {
-            if (!totalSizeShown) {
-              totalSizeShown = true;
-              onAttachmentsLimitError?.(
-                `Total attachments size exceeds ${MAX_TOTAL_ATTACHMENTS_BYTES / (1024 * 1024)}MB.`
-              );
-            }
-            continue;
-          }
-          addedBytes += file.size;
-          expectedCount += 1;
-          const reader = new FileReader();
-          reader.addEventListener("load", () => {
-            const dataUrl = reader.result as string;
-            add.push({
-              id: crypto.randomUUID(),
-              dataUrl,
-              mimeType: file.type || "application/octet-stream",
-              fileName: file.name,
-            });
-            if (add.length === expectedCount) {
-              onAttachmentsChange((prev) => [...prev, ...add]);
-              requestAnimationFrame(() => textareaRef.current?.focus());
-            }
-          });
-          reader.addEventListener("error", () => {
-            if (add.length === expectedCount) {
-              onAttachmentsChange((prev) => [...prev, ...add]);
-              requestAnimationFrame(() => textareaRef.current?.focus());
-            }
-          });
-          reader.readAsDataURL(file);
-        }
-
-        if (fileArray.length > maxNewCount && expectedCount === maxNewCount) {
-          onAttachmentsLimitError?.(
-            `Maximum ${maxAttachments} attachment${maxAttachments === 1 ? "" : "s"} allowed.`
-          );
-        }
-      },
-      [attachments, maxAttachments, onAttachmentsChange, onAttachmentsLimitError]
-    );
-
-    const onFileChange = React.useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
-        if (files?.length) {
-          addFiles(files);
-        }
-        e.target.value = "";
-      },
-      [addFiles]
-    );
-
-    const removeAttachment = React.useCallback(
-      (id: string) => {
-        onAttachmentsChange((prev) => prev.filter((a) => a.id !== id));
-      },
-      [onAttachmentsChange]
-    );
-
-    const onDrop = React.useCallback(
-      (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const files = e.dataTransfer?.files;
-        if (files?.length) {
-          addFiles(files);
-        }
-      },
-      [addFiles]
-    );
-
-    const onDragOver = React.useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    }, []);
 
     const canSend = value.trim().length > 0;
 
@@ -379,47 +267,10 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
                     <MicrophoneIcon />
                   </button>
                   {showMicTooltip && (
-                    <div className={s.UiChatMicTooltip}>
-                      {whisperDownload?.kind === "downloading" ? (
-                        <>
-                          <div className={s.UiChatMicTooltipText}>
-                            Downloading Whisper… {whisperDownload.percent}%
-                          </div>
-                          <div className={s.UiChatMicTooltipProgress}>
-                            <div
-                              className={s.UiChatMicTooltipProgressBar}
-                              style={{ width: `${whisperDownload.percent}%` }}
-                            />
-                          </div>
-                        </>
-                      ) : whisperDownload?.kind === "error" ? (
-                        <>
-                          <div className={s.UiChatMicTooltipText}>
-                            Download failed: {whisperDownload.message}
-                          </div>
-                          <button
-                            type="button"
-                            className={s.UiChatMicTooltipLink}
-                            onClick={() => onWhisperDownload?.()}
-                          >
-                            Retry
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <div className={s.UiChatMicTooltipText}>
-                            Download the Whisper model to use voice input.
-                          </div>
-                          <button
-                            type="button"
-                            className={s.UiChatMicTooltipLink}
-                            onClick={() => onWhisperDownload?.()}
-                          >
-                            Download
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    <WhisperDownloadTooltip
+                      whisperDownload={whisperDownload}
+                      onWhisperDownload={onWhisperDownload}
+                    />
                   )}
                 </div>
               )}

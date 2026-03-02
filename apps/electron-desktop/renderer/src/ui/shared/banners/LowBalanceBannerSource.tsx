@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppSelector, useAppDispatch } from "@store/hooks";
-import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { createAddonCheckout } from "@store/slices/auth/authSlice";
+import { openExternal } from "@shared/utils/openExternal";
 import { useBannerRegister } from "./BannerContext";
 import type { BannerItem } from "./types";
 
@@ -31,10 +31,7 @@ export function LowBalanceBannerSource() {
   const handleTopUp = React.useCallback(async () => {
     try {
       const result = await dispatch(createAddonCheckout({ amountUsd: DEFAULT_TOPUP_USD })).unwrap();
-      const api = getDesktopApiOrNull();
-      if (api?.openExternal) {
-        await api.openExternal(result.checkoutUrl);
-      }
+      openExternal(result.checkoutUrl);
     } catch {
       // Checkout failed — silently ignore; user can retry
     }

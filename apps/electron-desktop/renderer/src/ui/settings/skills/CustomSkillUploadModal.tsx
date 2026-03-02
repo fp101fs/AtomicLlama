@@ -2,6 +2,7 @@ import React from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { Modal } from "@shared/kit";
+import { openExternal } from "@shared/utils/openExternal";
 import { errorToMessage } from "@shared/toast";
 
 import cs from "./CustomSkillUpload.module.css";
@@ -188,7 +189,7 @@ export function CustomSkillUploadModal(props: {
             className={cs.UiCustomSkillInfoLink}
             onClick={(e) => {
               e.preventDefault();
-              void getDesktopApiOrNull()?.openExternal("https://clawhub.com");
+              openExternal("https://clawhub.com");
             }}
           >
             ClawHub

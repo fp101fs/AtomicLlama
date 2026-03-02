@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppSelector } from "@store/hooks";
-import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { backendApi } from "@ipc/backendApi";
+import { openExternal } from "@shared/utils/openExternal";
 import { useBannerRegister } from "./BannerContext";
 import type { BannerItem } from "./types";
 
@@ -31,16 +31,10 @@ export function SubscriptionBannerSource() {
     try {
       if (subscription === null) {
         const result = await backendApi.createSetupCheckout(jwt, {});
-        const api = getDesktopApiOrNull();
-        if (api?.openExternal) {
-          await api.openExternal(result.checkoutUrl);
-        }
+        openExternal(result.checkoutUrl);
       } else {
         const result = await backendApi.getPortalUrl(jwt);
-        const api = getDesktopApiOrNull();
-        if (api?.openExternal) {
-          await api.openExternal(result.portalUrl);
-        }
+        openExternal(result.portalUrl);
       }
     } catch {
       // Stripe redirect failed — silently ignore; user can retry

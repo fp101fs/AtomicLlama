@@ -1,6 +1,7 @@
 import React from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 import { FooterText, HeroPageLayout, PrimaryButton, SplashLogo } from "@shared/kit";
 import { addToastError } from "@shared/toast";
 import pkg from "../../../../package.json";
@@ -91,12 +92,7 @@ export function ConsentScreen({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  const openExternal = getDesktopApiOrNull()?.openExternal;
-                  if (typeof openExternal === "function") {
-                    void openExternal(termsUrl);
-                    return;
-                  }
-                  window.open(termsUrl, "_blank", "noopener,noreferrer");
+                  openExternal(termsUrl);
                 }}
               >
                 Terms of Use.

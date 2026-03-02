@@ -39,15 +39,7 @@ import {
 } from "./auth-utils";
 
 export type { SetupMode, AutoTopUpState, AuthSliceState, AuthRefreshReason } from "./auth-types";
-export { DEFAULT_AUTO_TOP_UP_SETTINGS } from "./auth-types";
 export { persistMode } from "./auth-persistence";
-export {
-  extractAuth,
-  extractModel,
-  getBaseHash,
-  normalizeAutoTopUpSettings,
-  resetAuthFields,
-} from "./auth-utils";
 
 const initialState: AuthSliceState = {
   mode: null,

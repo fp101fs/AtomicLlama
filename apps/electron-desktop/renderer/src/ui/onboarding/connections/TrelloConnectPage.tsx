@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { openExternal } from "@shared/utils/openExternal";
 import { GlassCard, HeroPageLayout, OnboardingDots, PrimaryButton, TextInput } from "@shared/kit";
 
 export function TrelloConnectPage(props: {
@@ -59,7 +59,7 @@ export function TrelloConnectPage(props: {
               className="UiLink"
               onClick={(e) => {
                 e.preventDefault();
-                void getDesktopApiOrNull()?.openExternal("https://trello.com/app-key");
+                openExternal("https://trello.com/app-key");
               }}
             >
               trello.com/app-key ↗

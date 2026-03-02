@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { Modal } from "@shared/kit/Modal";
+import { openExternal } from "@shared/utils/openExternal";
 import s from "./WhatsNewModal.module.css";
 
 const STORAGE_KEY = "whatsNew_lastVersion";
@@ -94,7 +95,7 @@ export function WhatsNewModal() {
 
   const handleOpenChangelog = () => {
     if (state.kind === "ready" && state.htmlUrl) {
-      void getDesktopApiOrNull()?.openExternal(state.htmlUrl);
+      openExternal(state.htmlUrl);
     }
   };
 

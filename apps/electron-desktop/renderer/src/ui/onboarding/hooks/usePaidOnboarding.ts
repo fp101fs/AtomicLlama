@@ -20,6 +20,8 @@ import {
 import { setOnboarded } from "@store/slices/onboardingSlice";
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { backendApi, type SubscriptionPriceInfo } from "@ipc/backendApi";
+import { openExternal } from "@shared/utils/openExternal";
+import { useDeepLinkAuth } from "@shared/hooks/useDeepLinkAuth";
 import { persistDesktopMode } from "../../shared/persistMode";
 import { addToastError } from "@shared/toast";
 
@@ -260,12 +262,7 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     setAuthBusy(true);
     try {
       const url = `${BACKEND_URL}/auth/google/desktop`;
-      const api = getDesktopApiOrNull();
-      if (api?.openExternal) {
-        await api.openExternal(url);
-      } else {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
+      openExternal(url);
     } catch (err) {
       setAuthError(String(err));
       setAuthBusy(false);
@@ -309,12 +306,7 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     try {
       const result = await backendApi.createSetupCheckout(jwt, {});
 
-      const api = getDesktopApiOrNull();
-      if (api?.openExternal) {
-        await api.openExternal(result.checkoutUrl);
-      } else {
-        window.open(result.checkoutUrl, "_blank");
-      }
+      openExternal(result.checkoutUrl);
 
       setPaymentPending(true);
     } catch (err) {
@@ -343,64 +335,62 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     [dispatch]
   );
 
-  React.useEffect(() => {
-    const api = getDesktopApiOrNull();
-    if (!api?.onDeepLink) return;
-
-    const unsub = api.onDeepLink((payload) => {
-      if (payload.host === "auth" || payload.pathname === "/auth") {
-        const { token, email, userId, isNewUser } = payload.params;
-        if (token && email && userId) {
-          void onGoogleAuthSuccess({
-            jwt: token,
-            email: decodeURIComponent(email),
-            userId,
-            isNewUser: isNewUser === "true",
-          });
-        } else {
-          setAuthError("Authentication failed — missing token data");
-          setAuthBusy(false);
-        }
-      } else if (payload.host === "stripe-success") {
-        nav.goSuccess();
-      }
-    });
-
-    return unsub;
-  }, [onGoogleAuthSuccess, nav.goSuccess]);
+  useDeepLinkAuth({
+    onAuth: (params) => {
+      void onGoogleAuthSuccess(params);
+    },
+    onAuthError: () => {
+      setAuthError("Authentication failed — missing token data");
+      setAuthBusy(false);
+    },
+    onStripeSuccess: nav.goSuccess,
+  });
 
   return {
-    // Auth/pay state
-    selectedModel,
-    selectedModelName,
-    authBusy,
-    authError,
-    payBusy,
-    payError,
-    paymentPending,
-    alreadySubscribed,
-    jwt,
-    autoTopUp,
-    autoTopUpLoading,
-    autoTopUpSaving,
-    autoTopUpError,
-    backendUrl: BACKEND_URL,
-    subscriptionPrice,
+    // ── Domain-grouped properties (used directly by WelcomePage routes) ──
 
-    // Model catalog (from config hook)
-    models: config.models,
-    modelsLoading: config.modelsLoading,
-    modelsError: config.modelsError,
-    loadModels: config.loadModels,
+    auth: { jwt, busy: authBusy, error: authError, startGoogleAuth, alreadySubscribed },
+    pay: {
+      busy: payBusy,
+      error: payError,
+      pending: paymentPending,
+      onPay,
+      subscriptionPrice,
+      loadSubscriptionPrice,
+    },
+    model: {
+      selected: selectedModel,
+      selectedName: selectedModelName,
+      models: config.models,
+      modelsLoading: config.modelsLoading,
+      modelsError: config.modelsError,
+      loadModels: config.loadModels,
+      onSelect: onPaidModelSelect,
+    },
+    billing: { autoTopUp, autoTopUpLoading, autoTopUpSaving, autoTopUpError, onAutoTopUpPatch },
+    nav: {
+      goSetupMode: nav.goSetupMode,
+      goPaidModelSelect: nav.goPaidModelSelect,
+      goSetupReview: nav.goSetupReview,
+      goSuccess: nav.goSuccess,
+      goPaidMediaUnderstanding,
+      goPaidSlackFromSkills: nav.goPaidSlackFromSkills,
+      goPaidSlackFromConnections: nav.goPaidSlackFromConnections,
+      goPaidSlackBack: nav.goPaidSlackBack,
+      goObsidian: obsidian.goObsidian,
+    },
+    flow: { onPaidConnectionsContinue, onStartChat },
 
-    // Skill/connection status
+    // ── Skill orchestration ──
     skillStatus,
     skillError,
+
+    // ── Flat FlowSource-compatible properties (passed through to SharedFlowRoutes) ──
+
     skills,
     markSkillConnected,
     hasOpenAiProvider: config.hasOpenAiProvider,
 
-    // Skill busy flags
     notionBusy: skillState.notionBusy,
     trelloBusy: skillState.trelloBusy,
     githubBusy: skillState.githubBusy,
@@ -411,18 +401,6 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     mediaUnderstandingBusy: skillState.mediaUnderstandingBusy,
     slackBusy: skillState.slackBusy,
 
-    // Navigation (only callbacks consumed by WelcomePage)
-    goSetupMode: nav.goSetupMode,
-    goPaidModelSelect: nav.goPaidModelSelect,
-    goSetupReview: nav.goSetupReview,
-    goSuccess: nav.goSuccess,
-    goPaidMediaUnderstanding,
-    goPaidSlackFromSkills: nav.goPaidSlackFromSkills,
-    goPaidSlackFromConnections: nav.goPaidSlackFromConnections,
-    goPaidSlackBack: nav.goPaidSlackBack,
-
-    // Obsidian (spread domain state)
-    goObsidian: obsidian.goObsidian,
     obsidianVaults: obsidian.obsidianVaults,
     obsidianVaultsLoading: obsidian.obsidianVaultsLoading,
     onObsidianRecheck: obsidian.onObsidianRecheck,
@@ -430,7 +408,6 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     selectedObsidianVaultName: obsidian.selectedObsidianVaultName,
     setSelectedObsidianVaultName: obsidian.setSelectedObsidianVaultName,
 
-    // Telegram
     channelsProbe: telegram.channelsProbe,
     onTelegramTokenNext: telegram.onTelegramTokenNext,
     onTelegramUserNext: telegram.onTelegramUserNext,
@@ -440,7 +417,6 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     telegramToken: telegram.telegramToken,
     telegramUserId: telegram.telegramUserId,
 
-    // Gog (Google Workspace)
     gogAccount: gog.gogAccount,
     gogBusy: gog.gogBusy,
     gogError: gog.gogError,
@@ -449,7 +425,6 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     onGogAuthList: gog.onGogAuthList,
     setGogAccount: gog.setGogAccount,
 
-    // Skill handlers
     onNotionApiKeySubmit,
     onTrelloSubmit,
     onGitHubConnect,
@@ -459,14 +434,5 @@ export function usePaidOnboarding({ navigate }: PaidOnboardingInput) {
     onMediaUnderstandingSubmit,
     onMediaProviderKeySubmit,
     onSlackConnect,
-
-    // Flow handlers
-    startGoogleAuth,
-    loadSubscriptionPrice,
-    onPaidModelSelect,
-    onPaidConnectionsContinue,
-    onPay,
-    onAutoTopUpPatch,
-    onStartChat,
   };
 }
