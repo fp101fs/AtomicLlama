@@ -5,11 +5,15 @@ import { vi } from "vitest";
 
 export const app = {
   getPath: vi.fn((name: string) => `/mock/${name}`),
+  getAppPath: vi.fn(() => "/mock/app"),
   getVersion: vi.fn(() => "0.0.0-test"),
   isPackaged: false,
+  on: vi.fn(),
   quit: vi.fn(),
   exit: vi.fn(),
   relaunch: vi.fn(),
+  requestSingleInstanceLock: vi.fn(() => true),
+  setAsDefaultProtocolClient: vi.fn(() => true),
   getLoginItemSettings: vi.fn(() => ({ openAtLogin: false })),
   setLoginItemSettings: vi.fn(),
   whenReady: vi.fn(() => Promise.resolve()),

@@ -4,6 +4,7 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { contextBridge } from "electron";
+import { DESKTOP_BRIDGE_KEYS } from "./shared/desktop-bridge-contract";
 
 describe("preload API contract", () => {
   beforeEach(() => {
@@ -22,95 +23,16 @@ describe("preload API contract", () => {
 
     const desktopApi = api as Record<string, unknown>;
 
-    // Core methods
-    const expectedMethods = [
-      "platform",
-      "version",
-      "openLogs",
-      "openWorkspaceFolder",
-      "openOpenclawFolder",
-      "toggleDevTools",
-      "retry",
-      "resetAndClose",
-      "getGatewayInfo",
-      "getConsentInfo",
-      "acceptConsent",
-      "startGateway",
-      "openExternal",
-      "setApiKey",
-      "setSetupToken",
-      "validateApiKey",
-      "authHasApiKey",
-      "oauthLogin",
-      "onOAuthProgress",
-      "gogAuthList",
-      "gogAuthAdd",
-      "gogAuthCredentials",
-      "memoCheck",
-      "remindctlAuthorize",
-      "remindctlTodayJson",
-      "obsidianCliCheck",
-      "obsidianCliPrintDefaultPath",
-      "obsidianVaultsList",
-      "obsidianCliSetDefault",
-      "ghCheck",
-      "ghAuthLoginPat",
-      "ghAuthStatus",
-      "ghApiUser",
-      "onGatewayState",
-      "readConfig",
-      "writeConfig",
-      "getLaunchAtLogin",
-      "setLaunchAtLogin",
-      "getAppVersion",
-      "fetchReleaseNotes",
-      "checkForUpdate",
-      "downloadUpdate",
-      "installUpdate",
-      "onUpdateAvailable",
-      "onUpdateDownloadProgress",
-      "onUpdateDownloaded",
-      "onUpdateError",
-      "createBackup",
-      "restoreBackup",
-      "detectLocalOpenclaw",
-      "restoreFromDirectory",
-      "selectOpenclawFolder",
-      "installCustomSkill",
-      "listCustomSkills",
-      "removeCustomSkill",
-      "defenderStatus",
-      "defenderApplyExclusions",
-      "defenderDismiss",
-      "terminalCreate",
-      "terminalWrite",
-      "terminalResize",
-      "terminalKill",
-      "terminalList",
-      "terminalGetBuffer",
-      "whisperModelStatus",
-      "whisperModelDownload",
-      "whisperModelDownloadCancel",
-      "whisperSetGatewayModel",
-      "onWhisperModelDownloadProgress",
-      "whisperModelsList",
-      "whisperTranscribe",
-      "focusWindow",
-      "authReadProfiles",
-      "authWriteProfiles",
-      "onDeepLink",
-      "onTerminalData",
-      "onTerminalExit",
-    ];
-
-    for (const method of expectedMethods) {
-      expect(desktopApi, `Missing API method: ${method}`).toHaveProperty(method);
+    for (const key of DESKTOP_BRIDGE_KEYS) {
+      expect(desktopApi, `Missing API method: ${key}`).toHaveProperty(key);
     }
 
     // Verify no extra unknown methods (beyond what we declared)
     const allKeys = Object.keys(desktopApi);
     for (const key of allKeys) {
-      expect(expectedMethods, `Unexpected API method: ${key}`).toContain(key);
+      expect(DESKTOP_BRIDGE_KEYS, `Unexpected API method: ${key}`).toContain(
+        key as (typeof DESKTOP_BRIDGE_KEYS)[number]
+      );
     }
   });
 });

@@ -14,6 +14,7 @@ import {
 } from "@shared/models/modelPresentation";
 import { errorToMessage } from "@shared/toast";
 import type { ConfigData } from "@store/slices/configSlice";
+import { patchAuthProfile } from "../../shared/utils/authProfiles";
 import { getDefaultModelPrimary, getConfiguredProviders } from "./configParsing";
 
 // TODO: move model catalog state (models, loading, error, keyConfiguredProviders)
@@ -262,24 +263,12 @@ export function useModelProvidersState(props: {
       try {
         const baseHash = await loadFreshBaseHash();
         await getDesktopApiOrNull()?.setApiKey(provider, key);
-        const profileId = `${provider}:default`;
-        await props.gw.request("config.patch", {
+        await patchAuthProfile({
+          gw: props.gw,
           baseHash,
-          raw: JSON.stringify(
-            {
-              auth: {
-                profiles: {
-                  [profileId]: { provider, mode: "api_key" },
-                },
-                order: {
-                  [provider]: [profileId],
-                },
-              },
-            },
-            null,
-            2
-          ),
-          note: `Settings: enable ${provider} api_key profile`,
+          provider,
+          mode: "api_key",
+          notePrefix: "Settings",
         });
         await props.reload();
         await refreshKeyConfiguredProviders();
@@ -306,24 +295,12 @@ export function useModelProvidersState(props: {
       try {
         const baseHash = await loadFreshBaseHash();
         await getDesktopApiOrNull()?.setSetupToken(provider, token);
-        const profileId = `${provider}:default`;
-        await props.gw.request("config.patch", {
+        await patchAuthProfile({
+          gw: props.gw,
           baseHash,
-          raw: JSON.stringify(
-            {
-              auth: {
-                profiles: {
-                  [profileId]: { provider, mode: "token" },
-                },
-                order: {
-                  [provider]: [profileId],
-                },
-              },
-            },
-            null,
-            2
-          ),
-          note: `Settings: enable ${provider} token profile`,
+          provider,
+          mode: "token",
+          notePrefix: "Settings",
         });
         await props.reload();
         await refreshKeyConfiguredProviders();

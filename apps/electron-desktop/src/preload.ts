@@ -1,29 +1,13 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-import type { ExecResult } from "./shared/types";
-import type { GogExecResult } from "./main/gog/types";
-import type { GatewayState, ResetAndCloseResult } from "./main/types";
+import type {
+  OpenclawDesktopApi,
+  UpdateAvailablePayload,
+  UpdateDownloadProgressPayload,
+  UpdateDownloadedPayload,
+  UpdateErrorPayload,
+} from "./shared/desktop-bridge-contract";
 import { IPC, IPC_EVENTS } from "./shared/ipc-channels";
-
-type UpdateAvailablePayload = {
-  version: string;
-  releaseDate?: string;
-};
-
-type UpdateDownloadProgressPayload = {
-  percent: number;
-  bytesPerSecond: number;
-  transferred: number;
-  total: number;
-};
-
-type UpdateDownloadedPayload = {
-  version: string;
-};
-
-type UpdateErrorPayload = {
-  message: string;
-};
 
 /** Helper: subscribe to an IPC event channel with automatic unsubscribe. */
 function onIpc<T>(channel: string, cb: (payload: T) => void): () => void {
@@ -33,158 +17,6 @@ function onIpc<T>(channel: string, cb: (payload: T) => void): () => void {
     ipcRenderer.removeListener(channel, handler);
   };
 }
-
-type OpenclawDesktopApi = {
-  platform: NodeJS.Platform;
-  version: string;
-  openLogs: () => Promise<void>;
-  openWorkspaceFolder: () => Promise<void>;
-  openOpenclawFolder: () => Promise<void>;
-  toggleDevTools: () => Promise<void>;
-  retry: () => Promise<void>;
-  resetAndClose: () => Promise<ResetAndCloseResult>;
-  getGatewayInfo: () => Promise<{ state: GatewayState | null }>;
-  getConsentInfo: () => Promise<{ accepted: boolean }>;
-  acceptConsent: () => Promise<{ ok: true }>;
-  startGateway: () => Promise<{ ok: true }>;
-  openExternal: (url: string) => Promise<void>;
-  setApiKey: (provider: string, apiKey: string) => Promise<{ ok: true }>;
-  setSetupToken: (provider: string, token: string) => Promise<{ ok: true }>;
-  validateApiKey: (provider: string, apiKey: string) => Promise<{ valid: boolean; error?: string }>;
-  authHasApiKey: (provider: string) => Promise<{ configured: boolean }>;
-  authReadProfiles: () => Promise<{
-    profiles: Record<string, { type: string; provider: string; [k: string]: unknown }>;
-    order: Record<string, string[]>;
-  }>;
-  authWriteProfiles: (store: {
-    profiles: Record<string, unknown>;
-    order: Record<string, string[]>;
-  }) => Promise<{ ok: true }>;
-  // OAuth login (runs full flow in main process, opens browser automatically)
-  oauthLogin: (provider: string) => Promise<{ ok: true; profileId: string }>;
-  onOAuthProgress: (cb: (payload: { provider: string; message: string }) => void) => () => void;
-  gogAuthList: () => Promise<GogExecResult>;
-  gogAuthAdd: (params: {
-    account: string;
-    services?: string;
-    noInput?: boolean;
-  }) => Promise<GogExecResult>;
-  gogAuthCredentials: (params: {
-    credentialsJson: string;
-    filename?: string;
-  }) => Promise<GogExecResult>;
-  memoCheck: () => Promise<ExecResult>;
-  remindctlAuthorize: () => Promise<ExecResult>;
-  remindctlTodayJson: () => Promise<ExecResult>;
-  obsidianCliCheck: () => Promise<ExecResult>;
-  obsidianCliPrintDefaultPath: () => Promise<ExecResult>;
-  obsidianVaultsList: () => Promise<ExecResult>;
-  obsidianCliSetDefault: (params: { vaultName: string }) => Promise<ExecResult>;
-  ghCheck: () => Promise<ExecResult>;
-  ghAuthLoginPat: (params: { pat: string }) => Promise<ExecResult>;
-  ghAuthStatus: () => Promise<ExecResult>;
-  ghApiUser: () => Promise<ExecResult>;
-  onGatewayState: (cb: (state: GatewayState) => void) => () => void;
-  // OpenClaw config (openclaw.json)
-  readConfig: () => Promise<{ ok: boolean; content: string; error?: string }>;
-  writeConfig: (content: string) => Promise<{ ok: boolean; error?: string }>;
-  // Launch at login (auto-start)
-  getLaunchAtLogin: () => Promise<{ enabled: boolean }>;
-  setLaunchAtLogin: (enabled: boolean) => Promise<{ ok: true }>;
-  // App version
-  getAppVersion: () => Promise<{ version: string }>;
-  fetchReleaseNotes: (
-    version: string,
-    owner: string,
-    repo: string
-  ) => Promise<{ ok: boolean; body: string; htmlUrl: string }>;
-  // Auto-updater
-  checkForUpdate: () => Promise<void>;
-  downloadUpdate: () => Promise<void>;
-  installUpdate: () => Promise<void>;
-  onUpdateAvailable: (cb: (payload: UpdateAvailablePayload) => void) => () => void;
-  onUpdateDownloadProgress: (cb: (payload: UpdateDownloadProgressPayload) => void) => () => void;
-  onUpdateDownloaded: (cb: (payload: UpdateDownloadedPayload) => void) => () => void;
-  onUpdateError: (cb: (payload: UpdateErrorPayload) => void) => () => void;
-  // Backup & restore
-  createBackup: (mode?: string) => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
-  restoreBackup: (
-    data: string,
-    filename?: string
-  ) => Promise<{ ok: boolean; error?: string; meta?: { mode?: string } }>;
-  detectLocalOpenclaw: () => Promise<{ found: boolean; path: string }>;
-  restoreFromDirectory: (
-    dirPath: string
-  ) => Promise<{ ok: boolean; error?: string; meta?: { mode?: string } }>;
-  selectOpenclawFolder: () => Promise<{
-    ok: boolean;
-    path?: string;
-    cancelled?: boolean;
-    error?: string;
-  }>;
-  // Custom skills
-  installCustomSkill: (data: string) => Promise<{
-    ok: boolean;
-    skill?: { name: string; description: string; emoji: string; dirName: string };
-    error?: string;
-  }>;
-  listCustomSkills: () => Promise<{
-    ok: boolean;
-    skills: Array<{ name: string; description: string; emoji: string; dirName: string }>;
-  }>;
-  removeCustomSkill: (dirName: string) => Promise<{ ok: boolean; error?: string }>;
-  // Local Whisper voice transcription
-  whisperModelStatus: (params?: { model?: string }) => Promise<{
-    modelReady: boolean;
-    binReady: boolean;
-    modelPath: string;
-    size: number;
-    modelId: string;
-  }>;
-  whisperModelDownload: (params?: {
-    model?: string;
-  }) => Promise<{ ok: boolean; modelPath?: string; error?: string }>;
-  whisperModelDownloadCancel: () => Promise<{ ok: boolean }>;
-  whisperSetGatewayModel: (modelId: string) => Promise<{ ok: boolean; error?: string }>;
-  onWhisperModelDownloadProgress: (
-    cb: (payload: { percent: number; transferred: number; total: number }) => void
-  ) => () => void;
-  whisperModelsList: () => Promise<
-    Array<{
-      id: string;
-      label: string;
-      description: string;
-      sizeLabel: string;
-      downloaded: boolean;
-      size: number;
-    }>
-  >;
-  whisperTranscribe: (params: {
-    audio: string;
-    language?: string;
-    model?: string;
-  }) => Promise<{ ok: boolean; text?: string; error?: string }>;
-  // Refocus BrowserWindow after native dialogs steal OS-level focus
-  focusWindow: () => Promise<void>;
-  // Windows Defender exclusions
-  defenderStatus: () => Promise<{ applied: boolean; dismissed: boolean; isWindows: boolean }>;
-  defenderApplyExclusions: () => Promise<{ ok: boolean; error?: string }>;
-  defenderDismiss: () => Promise<{ ok: boolean }>;
-  onDeepLink: (
-    cb: (payload: { host: string; pathname: string; params: Record<string, string> }) => void
-  ) => () => void;
-  // Embedded terminal (PTY) — multi-session
-  terminalCreate: () => Promise<{ id: string }>;
-  terminalWrite: (id: string, data: string) => Promise<void>;
-  terminalResize: (id: string, cols: number, rows: number) => Promise<void>;
-  terminalKill: (id: string) => Promise<void>;
-  terminalList: () => Promise<Array<{ id: string; alive: boolean }>>;
-  terminalGetBuffer: (id: string) => Promise<string>;
-  onTerminalData: (cb: (payload: { id: string; data: string }) => void) => () => void;
-  onTerminalExit: (
-    cb: (payload: { id: string; exitCode: number; signal?: number }) => void
-  ) => () => void;
-};
 
 // Expose only the bare minimum to the renderer. The Control UI is served by the Gateway and
 // does not require Electron privileged APIs.
@@ -234,7 +66,7 @@ const api: OpenclawDesktopApi = {
   ghAuthLoginPat: async (params: { pat: string }) => ipcRenderer.invoke(IPC.ghAuthLoginPat, params),
   ghAuthStatus: async () => ipcRenderer.invoke(IPC.ghAuthStatus),
   ghApiUser: async () => ipcRenderer.invoke(IPC.ghApiUser),
-  onGatewayState: (cb: (state: GatewayState) => void) => onIpc(IPC_EVENTS.gatewayState, cb),
+  onGatewayState: (cb) => onIpc(IPC_EVENTS.gatewayState, cb),
   readConfig: async () => ipcRenderer.invoke(IPC.configRead),
   writeConfig: async (content: string) => ipcRenderer.invoke(IPC.configWrite, { content }),
   getLaunchAtLogin: async () => ipcRenderer.invoke(IPC.launchAtLoginGet),

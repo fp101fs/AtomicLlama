@@ -1,5 +1,6 @@
 import React from "react";
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { patchAuthProfile } from "../../shared/utils/authProfiles";
 import { setVoiceProvider } from "../../chat/hooks/useVoiceInput";
 import type { Provider } from "../providers/ProviderSelectPage";
 import type { ConfigSnapshot, GatewayRpcLike } from "./types";
@@ -37,24 +38,12 @@ export function useWelcomeApiKey({
       if (!baseHash) {
         throw new Error("Config base hash missing. Reload and try again.");
       }
-      const profileId = `${provider}:default`;
-      await gw.request("config.patch", {
+      await patchAuthProfile({
+        gw,
         baseHash,
-        raw: JSON.stringify(
-          {
-            auth: {
-              profiles: {
-                [profileId]: { provider, mode: "api_key" },
-              },
-              order: {
-                [provider]: [profileId],
-              },
-            },
-          },
-          null,
-          2
-        ),
-        note: `Welcome: enable ${provider} api_key profile`,
+        provider,
+        mode: "api_key",
+        notePrefix: "Welcome",
       });
       setStatus(`${provider} API key saved.`);
       return true;
@@ -77,24 +66,12 @@ export function useWelcomeApiKey({
       if (!baseHash) {
         throw new Error("Config base hash missing. Reload and try again.");
       }
-      const profileId = `${provider}:default`;
-      await gw.request("config.patch", {
+      await patchAuthProfile({
+        gw,
         baseHash,
-        raw: JSON.stringify(
-          {
-            auth: {
-              profiles: {
-                [profileId]: { provider, mode: "token" },
-              },
-              order: {
-                [provider]: [profileId],
-              },
-            },
-          },
-          null,
-          2
-        ),
-        note: `Welcome: enable ${provider} token profile`,
+        provider,
+        mode: "token",
+        notePrefix: "Welcome",
       });
       setStatus(`${provider} setup token saved.`);
       return true;

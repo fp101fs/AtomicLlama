@@ -27,6 +27,7 @@ import { useWelcomeTelegram } from "./useWelcomeTelegram";
 import { useWelcomeTrello } from "./useWelcomeTrello";
 import { useWelcomeWebSearch } from "./useWelcomeWebSearch";
 import { addToastError, errorToMessage } from "@shared/toast";
+import { patchAuthProfile } from "../../shared/utils/authProfiles";
 
 type WelcomeStateInput = {
   state: Extract<GatewayState, { kind: "ready" }>;
@@ -173,23 +174,13 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
         const baseHash =
           typeof snap.hash === "string" && snap.hash.trim() ? snap.hash.trim() : null;
         if (baseHash && provider) {
-          await gw.request("config.patch", {
+          await patchAuthProfile({
+            gw,
             baseHash,
-            raw: JSON.stringify(
-              {
-                auth: {
-                  profiles: {
-                    [profileId]: { provider, mode: "oauth" },
-                  },
-                  order: {
-                    [provider]: [profileId],
-                  },
-                },
-              },
-              null,
-              2
-            ),
-            note: `Welcome: enable ${provider} oauth profile`,
+            provider,
+            mode: "oauth",
+            profileId,
+            notePrefix: "Welcome",
           });
         }
         await loadModels();
