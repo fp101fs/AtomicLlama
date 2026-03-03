@@ -68,7 +68,7 @@ export async function selectSelfManaged(page: Page): Promise<void> {
   await waitForSetupModePage(page);
   await page
     .locator('[aria-label="Setup mode selection"]')
-    .getByRole("button", { name: "Continue with API key" })
+    .getByRole("button", { name: "Continue with API key", exact: true })
     .click();
 }
 
@@ -76,7 +76,7 @@ export async function selectPaid(page: Page): Promise<void> {
   await waitForSetupModePage(page);
   await page
     .locator('[aria-label="Setup mode selection"]')
-    .getByRole("button", { name: "Continue with Google" })
+    .getByRole("button", { name: "Continue with Google", exact: true })
     .click();
 }
 
@@ -534,6 +534,52 @@ export async function waitForAssistantResponse(page: Page, timeout = 120_000): P
 export async function navigateToSettings(page: Page): Promise<void> {
   await page.locator('[aria-label="Settings"]').click();
   await page.locator('[aria-label="Settings page"]').waitFor({ state: "visible", timeout: 15_000 });
+}
+
+export async function navigateToMessengersTab(page: Page): Promise<void> {
+  await navigateToSettings(page);
+  const tabNav = page.locator('[aria-label="Settings sections"]');
+  await tabNav.getByText("Messengers").click();
+  await page.waitForTimeout(500);
+}
+
+export async function navigateToSkillsTab(page: Page): Promise<void> {
+  await navigateToSettings(page);
+  const tabNav = page.locator('[aria-label="Settings sections"]');
+  await tabNav.getByText("Skills").click();
+  await page.waitForTimeout(500);
+}
+
+// ---- IPC event simulation (main -> renderer) ----
+
+export async function simulateUpdaterEvent(
+  app: ElectronApplication,
+  event: "updater-available" | "updater-download-progress" | "updater-downloaded" | "updater-error",
+  data: Record<string, unknown>
+): Promise<void> {
+  await app.evaluate(
+    ({ BrowserWindow }, { event, data }) => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) {
+          win.webContents.send(event, data);
+        }
+      }
+    },
+    { event, data }
+  );
+}
+
+export async function simulateGatewayState(
+  app: ElectronApplication,
+  state: Record<string, unknown>
+): Promise<void> {
+  await app.evaluate(({ BrowserWindow }, payload) => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send("gateway-state", payload);
+      }
+    }
+  }, state);
 }
 
 export async function getSessionsList(page: Page): Promise<unknown[]> {

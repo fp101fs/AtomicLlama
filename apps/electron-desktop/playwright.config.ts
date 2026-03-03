@@ -10,7 +10,7 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 15_000 },
   retries: 0,
-  workers: 4,
+  workers: 3,
   reporter: "list",
   use: {
     trace: "on-first-retry",

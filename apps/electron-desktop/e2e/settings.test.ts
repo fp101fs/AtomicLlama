@@ -56,7 +56,7 @@ test.describe("Settings page", () => {
     await expect(page.locator('[aria-label="Settings page"]')).toBeVisible();
 
     const tabNav = page.locator('[aria-label="Settings sections"]');
-    for (const tabName of ["AI Models", "AI Providers", "Messengers", "Skills", "Voice", "Other"]) {
+    for (const tabName of ["Connection & AI Models", "Messengers", "Skills", "Voice", "Other"]) {
       await expect(tabNav.getByText(tabName)).toBeVisible();
     }
   });
@@ -65,12 +65,8 @@ test.describe("Settings page", () => {
     test.setTimeout(60_000);
     const tabNav = page.locator('[aria-label="Settings sections"]');
 
-    await tabNav.getByText("AI Models").click();
-    await expect(page.locator('[aria-label="Model list"]')).toBeVisible({ timeout: 15_000 });
-
-    await tabNav.getByText("AI Providers").click();
-    // Provider tiles use aria-label like "Anthropic (Claude) (configured)"
-    await expect(page.locator('[role="button"][aria-label*="(configured)"]').first()).toBeVisible({
+    await tabNav.getByText("Connection & AI Models").click();
+    await expect(page.locator('button[aria-haspopup="listbox"]').first()).toBeVisible({
       timeout: 15_000,
     });
 
@@ -89,19 +85,33 @@ test.describe("Settings page", () => {
   test("change default model via settings", async () => {
     test.setTimeout(60_000);
     const tabNav = page.locator('[aria-label="Settings sections"]');
-    await tabNav.getByText("AI Models").click();
-    await page.locator('[aria-label="Model list"]').waitFor({ state: "visible", timeout: 15_000 });
+    await tabNav.getByText("Connection & AI Models").click();
+    await page.waitForTimeout(1_000);
 
-    const radios = page.locator('input[name="model"]');
-    const count = await radios.count();
+    // Open the Model dropdown (RichSelect)
+    const modelTrigger = page.locator('button[aria-haspopup="listbox"]').last();
+    await modelTrigger.click();
+    await page.waitForTimeout(500);
+
+    const listbox = page.locator('[role="listbox"]');
+    await expect(listbox).toBeVisible({ timeout: 5_000 });
+    const options = listbox.locator('[role="option"]');
+    const count = await options.count();
     if (count < 2) {
       test.skip(true, "Only one model available, cannot test switching");
       return;
     }
 
-    const originalModel = await page.locator('input[name="model"]:checked').getAttribute("value");
+    const snapBefore = await getConfig(page);
+    const cfgBefore = getObj(snapBefore.config);
+    const agentsBefore = getObj(cfgBefore.agents);
+    const defaultsBefore = getObj(agentsBefore.defaults);
+    const modelBefore = getObj(defaultsBefore.model);
+    const originalModel = modelBefore.primary;
 
-    await radios.nth(1).check({ force: true });
+    // Select the second option (first non-active)
+    const nonActive = options.filter({ hasNot: page.locator('[aria-selected="true"]') }).first();
+    await nonActive.click();
     await page.waitForTimeout(2_000);
 
     const snap = await getConfig(page);
@@ -118,18 +128,22 @@ test.describe("Settings page", () => {
     test.setTimeout(60_000);
 
     const tabNav = page.locator('[aria-label="Settings sections"]');
-    await tabNav.getByText("AI Providers").click();
+    await tabNav.getByText("Connection & AI Models").click();
     await page.waitForTimeout(1_000);
+
+    // Open the Provider dropdown and select the second provider
+    const providerTrigger = page.locator('button[aria-haspopup="listbox"]').first();
+    await providerTrigger.click();
+    await page.waitForTimeout(500);
 
     const displayName = PROVIDER_DISPLAY_NAMES[secondCreds!.provider] ?? secondCreds!.provider;
-
-    // Click the "Connect" button inside the unconfigured provider tile
-    const tile = page.locator(`[role="button"][aria-label="${displayName}"]`);
-    await tile.getByRole("button", { name: "Connect" }).click();
-
-    // Wait for the API key input modal/page to appear
+    const listbox = page.locator('[role="listbox"]');
+    await expect(listbox).toBeVisible({ timeout: 5_000 });
+    await listbox.getByText(displayName).click();
     await page.waitForTimeout(1_000);
-    const keyInput = page.locator('input[type="password"], input[type="text"]').last();
+
+    // Fill the API key in the InlineApiKey section
+    const keyInput = page.locator('input[type="password"]');
     await keyInput.waitFor({ state: "visible", timeout: 10_000 });
     await keyInput.fill(secondCreds!.key);
     await page.waitForTimeout(500);

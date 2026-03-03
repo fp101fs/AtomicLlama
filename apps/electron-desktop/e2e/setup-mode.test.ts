@@ -38,7 +38,9 @@ test.describe("Setup mode selection page", () => {
 
     await expect(container.getByText("Do everything for me")).toBeVisible();
     await expect(container.getByText("Popular")).toBeVisible();
-    await expect(container.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+    await expect(
+      container.getByRole("button", { name: "Continue with Google", exact: true })
+    ).toBeVisible();
   });
 
   test("shows self-managed option with API key button", async () => {
@@ -46,7 +48,9 @@ test.describe("Setup mode selection page", () => {
 
     await expect(container.getByText("Manual setup")).toBeVisible();
     await expect(container.getByText("Free with your own API Keys")).toBeVisible();
-    await expect(container.getByRole("button", { name: "Continue with API key" })).toBeVisible();
+    await expect(
+      container.getByRole("button", { name: "Continue with API key", exact: true })
+    ).toBeVisible();
   });
 
   test("selecting self-managed navigates to provider select", async () => {

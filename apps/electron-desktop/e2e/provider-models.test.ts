@@ -87,36 +87,36 @@ test.describe("Provider addition, model listing, and model switching", () => {
 
   // ── Add second provider via Settings UI ───────────────────
 
-  test("navigate to AI Providers and add second provider", async () => {
+  test("navigate to Connection & AI Models and add second provider", async () => {
     test.setTimeout(60_000);
     await navigateToSettings(page);
 
     const tabNav = page.locator('[aria-label="Settings sections"]');
-    await tabNav.getByText("AI Providers").click();
+    await tabNav.getByText("Connection & AI Models").click();
     await page.waitForTimeout(1_000);
 
     const displayName = PROVIDER_DISPLAY_NAMES[secondCreds!.provider] ?? secondCreds!.provider;
 
-    // Click "Connect" button inside the unconfigured provider tile
-    const tile = page.locator(`[role="button"][aria-label="${displayName}"]`);
-    await tile.waitFor({ state: "visible", timeout: 10_000 });
-    const connectBtn = tile.locator("button", { hasText: "Connect" });
-    await connectBtn.click();
+    // Open the Provider dropdown and select the second provider
+    const providerTrigger = page.locator('button[aria-haspopup="listbox"]').first();
+    await providerTrigger.click();
+    await page.waitForTimeout(500);
 
-    // Wait for modal to appear (aria-label depends on provider auth type)
-    const modal = page.locator('[role="dialog"]');
-    await modal.waitFor({ state: "visible", timeout: 10_000 });
+    const listbox = page.locator('[role="listbox"]');
+    await expect(listbox).toBeVisible({ timeout: 5_000 });
+    await listbox.getByText(displayName).click();
+    await page.waitForTimeout(1_000);
 
-    // Fill in the API key
-    const keyInput = modal.locator('input[type="password"]');
+    // Fill the API key via InlineApiKey section
+    const keyInput = page.locator('input[type="password"]');
+    await keyInput.waitFor({ state: "visible", timeout: 10_000 });
     await keyInput.fill(secondCreds!.key);
+    await page.waitForTimeout(500);
 
-    // Click Save
-    const saveBtn = modal.locator("button").filter({ hasText: /Save/ });
+    const saveBtn = page.getByRole("button", { name: /Continue|Save|Connect/ }).last();
     await saveBtn.click();
 
-    // Wait for modal to close (save succeeded)
-    await modal.waitFor({ state: "hidden", timeout: 30_000 });
+    await page.waitForTimeout(5_000);
   });
 
   // ── Verify via RPC ────────────────────────────────────────
@@ -166,35 +166,63 @@ test.describe("Provider addition, model listing, and model switching", () => {
 
   // ── Verify models from both providers in UI ───────────────
 
-  test("AI Models tab shows models from both providers", async () => {
-    test.setTimeout(30_000);
+  test("model dropdown includes models for current provider", async () => {
+    test.setTimeout(60_000);
     const tabNav = page.locator('[aria-label="Settings sections"]');
-    await tabNav.getByText("AI Models").click();
+    await tabNav.getByText("Connection & AI Models").click();
+    await page.waitForTimeout(2_000);
 
-    const modelList = page.locator('[aria-label="Model list"]');
-    await modelList.waitFor({ state: "visible", timeout: 15_000 });
+    // Wait for models to load — the trigger text changes from "Select model…"
+    const modelTrigger = page.locator('button[aria-haspopup="listbox"]').last();
+    await expect(modelTrigger).not.toBeDisabled({ timeout: 15_000 });
 
-    // Verify group titles exist for both providers
-    const groupTitles = modelList.locator(".UiModelGroupTitle");
-    const count = await groupTitles.count();
-    expect(count).toBeGreaterThanOrEqual(2);
+    // Retry click until listbox opens (models may still be loading)
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await modelTrigger.click();
+      await page.waitForTimeout(500);
+      const listbox = page.locator('[role="listbox"]');
+      if (await listbox.isVisible()) {
+        const options = listbox.locator('[role="option"]');
+        const count = await options.count();
+        expect(count).toBeGreaterThanOrEqual(1);
+        await page.keyboard.press("Escape");
+        return;
+      }
+      await page.waitForTimeout(2_000);
+    }
+    throw new Error("Model dropdown never opened with options");
   });
 
   // ── Switch model to second provider ───────────────────────
 
   test("switch to a model from the second provider", async () => {
     test.setTimeout(30_000);
-    const modelList = page.locator('[aria-label="Model list"]');
 
-    // Find first radio whose value starts with the second provider ID
-    const secondProviderRadio = modelList.locator(
-      `input[name="model"][value^="${secondCreds!.provider}/"]`
-    );
-    const radioCount = await secondProviderRadio.count();
-    expect(radioCount).toBeGreaterThan(0);
+    // First switch the provider dropdown to the second provider
+    const providerTrigger = page.locator('button[aria-haspopup="listbox"]').first();
+    await providerTrigger.click();
+    await page.waitForTimeout(500);
 
-    // Click the first matching radio
-    await secondProviderRadio.first().check({ force: true });
+    const providerListbox = page.locator('[role="listbox"]');
+    await expect(providerListbox).toBeVisible({ timeout: 5_000 });
+
+    const displayName = PROVIDER_DISPLAY_NAMES[secondCreds!.provider] ?? secondCreds!.provider;
+    await providerListbox.getByText(displayName).click();
+    await page.waitForTimeout(1_000);
+
+    // Open the Model dropdown and select the first model
+    const modelTrigger = page.locator('button[aria-haspopup="listbox"]').last();
+    await modelTrigger.click();
+    await page.waitForTimeout(500);
+
+    const modelListbox = page.locator('[role="listbox"]');
+    await expect(modelListbox).toBeVisible({ timeout: 5_000 });
+
+    const options = modelListbox.locator('[role="option"]');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+    await options.first().click();
+
     await page.waitForTimeout(2_000);
   });
 

@@ -182,22 +182,25 @@ test.describe("Backup roundtrip (create -> mutate -> restore -> verify)", () => 
     await navigateToSettings(page);
 
     const tabNav = page.locator('[aria-label="Settings sections"]');
-    await tabNav.getByText("AI Providers").click();
+    await tabNav.getByText("Connection & AI Models").click();
     await page.waitForTimeout(1_000);
 
-    const configuredTile = page.locator('[role="button"][aria-label*="(configured)"]');
-    await expect(configuredTile.first()).toBeVisible({ timeout: 10_000 });
+    // In the combined tab, a configured provider shows "API key configured" or "Connected" badge
+    const configuredBadge = page.getByText(/API key configured|Connected/);
+    await expect(configuredBadge.first()).toBeVisible({ timeout: 10_000 });
   });
 
   test("settings shows correct model selected after restore", async () => {
     test.setTimeout(30_000);
-    const tabNav = page.locator('[aria-label="Settings sections"]');
-    await tabNav.getByText("AI Models").click();
-    await page.locator('[aria-label="Model list"]').waitFor({ state: "visible", timeout: 15_000 });
 
-    const checkedModel = page.locator('input[name="model"]:checked');
-    const checkedValue = await checkedModel.getAttribute("value");
-    expect(checkedValue).toBeTruthy();
+    // Model dropdown trigger shows the selected model label
+    const modelTrigger = page.locator('button[aria-haspopup="listbox"]').last();
+    await expect(modelTrigger).toBeVisible({ timeout: 10_000 });
+
+    // Verify the trigger does not show the placeholder text
+    const triggerText = await modelTrigger.innerText();
+    expect(triggerText).toBeTruthy();
+    expect(triggerText).not.toContain("Select model");
   });
 
   // ── Verify chat works after restore ───────────────────────
