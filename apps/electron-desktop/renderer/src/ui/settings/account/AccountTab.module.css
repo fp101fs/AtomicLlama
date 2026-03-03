@@ -126,6 +126,30 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.balancePollingHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.balancePollingSpinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: balanceSpin 0.7s linear infinite;
+}
+
+@keyframes balanceSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .infoIcon {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.35);

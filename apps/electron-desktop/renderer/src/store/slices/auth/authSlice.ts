@@ -58,6 +58,7 @@ const initialState: AuthSliceState = {
   refreshFailureCount: 0,
   topUpPending: false,
   topUpError: null,
+  balancePolling: false,
   autoTopUp: { ...DEFAULT_AUTO_TOP_UP_SETTINGS },
   autoTopUpLoading: false,
   autoTopUpSaving: false,
@@ -445,6 +446,9 @@ const authSlice = createSlice({
       state.refreshError = action.payload.message;
       state.nextAllowedAt = action.payload.nextAllowedAt;
       state.refreshFailureCount += 1;
+    },
+    setBalancePolling(state, action: PayloadAction<boolean>) {
+      state.balancePolling = action.payload;
     },
   },
   extraReducers: (builder) => {

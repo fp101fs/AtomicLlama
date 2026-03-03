@@ -23,6 +23,7 @@ const mockAuthState = {
   subscription: { status: "active", currentPeriodEnd: "2026-03-01", stripeSubscriptionId: "sub_1" },
   lastRefreshAt: Date.now(),
   topUpPending: false,
+  balancePolling: false,
   autoTopUp: {
     enabled: true,
     thresholdUsd: 2,
@@ -134,6 +135,12 @@ vi.mock("@shared/kit", () => ({
         {children}
       </div>
     ) : null,
+}));
+
+vi.mock("@shared/billing/AnimatedBalance", () => ({
+  AnimatedBalance: ({ value, prefix = "$" }: { value: number; prefix?: string }) => (
+    <span>{`${prefix}${value.toFixed(2)}`}</span>
+  ),
 }));
 
 vi.mock("@shared/billing/AutoTopUpControl", () => ({

@@ -13,6 +13,7 @@ import type { SubscriptionPriceInfo } from "@ipc/backendApi";
 import { PrimaryButton, Modal } from "@shared/kit";
 import { LogOutIcon } from "@shared/kit/icons";
 import { AutoTopUpControl } from "@shared/billing/AutoTopUpControl";
+import { AnimatedBalance } from "@shared/billing/AnimatedBalance";
 import { addToastError } from "@shared/toast";
 
 import googleIcon from "@assets/set-up-skills/Google.svg";
@@ -189,9 +190,16 @@ function BalanceDashboard(props: {
           <span
             className={`${s.balanceAmount}${showRedBalance ? ` ${s["balanceAmount--expired"]}` : ""}`}
           >
-            {showRedBalance ? "$0" : formatDollars(remaining)}
+            {showRedBalance ? "$0" : <AnimatedBalance value={remaining} />}
           </span>
-          <span className={s.balanceLabel}>Remaining credits</span>
+          {st.balancePolling ? (
+            <span className={s.balancePollingHint}>
+              <span className={s.balancePollingSpinner} aria-hidden="true" />
+              Updating...
+            </span>
+          ) : (
+            <span className={s.balanceLabel}>Remaining credits</span>
+          )}
           <span className={s.infoIcon} title="Credits remaining on your plan">
             &#9432;
           </span>
@@ -238,7 +246,9 @@ function BalanceDashboard(props: {
           </div>
           <div className={s.statBox}>
             <span className={s.statLabel}>Used this month</span>
-            <span className={s.statValue}>{formatDollars(usage)}</span>
+            <span className={s.statValue}>
+              <AnimatedBalance value={usage} />
+            </span>
           </div>
           <div className={s.statBox}>
             <span className={s.statLabel}>Per month plan</span>

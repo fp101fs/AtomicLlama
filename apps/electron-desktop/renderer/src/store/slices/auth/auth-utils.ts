@@ -71,6 +71,7 @@ export function resetAuthFields(state: AuthSliceState): void {
   state.refreshFailureCount = 0;
   state.topUpPending = false;
   state.topUpError = null;
+  state.balancePolling = false;
   state.autoTopUp = { ...DEFAULT_AUTO_TOP_UP_SETTINGS };
   state.autoTopUpLoading = false;
   state.autoTopUpSaving = false;

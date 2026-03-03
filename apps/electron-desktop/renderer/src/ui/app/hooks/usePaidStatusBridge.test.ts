@@ -107,7 +107,7 @@ describe("usePaidStatusBridge", () => {
     expect(dispatchMock.mock.calls.length).toBe(callsBeforeUnmount);
   });
 
-  it("shows toast immediately when balance increases on first poll", async () => {
+  it("shows toast when balance increases on first poll", async () => {
     const { getCb } = setupDeepLink();
 
     dispatchMock.mockReturnValue({
@@ -118,7 +118,7 @@ describe("usePaidStatusBridge", () => {
 
     await act(async () => {
       getCb()!({ host: "addon-success", pathname: "/", params: {} });
-      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(2000);
     });
 
     expect(mockFetchBalance).toHaveBeenCalledTimes(1);
@@ -138,14 +138,14 @@ describe("usePaidStatusBridge", () => {
 
     await act(async () => {
       getCb()!({ host: "addon-success", pathname: "/", params: {} });
-      // First poll (immediate) returns stale balance
-      await vi.advanceTimersByTimeAsync(0);
+      // First poll after 2s returns stale balance
+      await vi.advanceTimersByTimeAsync(2000);
     });
 
     expect(mockFetchBalance).toHaveBeenCalledTimes(1);
     expect(mockAddToast).not.toHaveBeenCalled();
 
-    // Second poll after 2s returns updated balance
+    // Second poll after another 2s returns updated balance
     await act(async () => {
       await vi.advanceTimersByTimeAsync(2000);
     });
@@ -204,7 +204,7 @@ describe("usePaidStatusBridge", () => {
 
     await act(async () => {
       getCb()!({ host: "addon-success", pathname: "/", params: {} });
-      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(2000);
     });
 
     expect(mockFetchBalance).toHaveBeenCalledTimes(1);
@@ -212,7 +212,7 @@ describe("usePaidStatusBridge", () => {
     unmount();
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(20000);
+      await vi.advanceTimersByTimeAsync(60000);
     });
 
     // No additional calls after unmount

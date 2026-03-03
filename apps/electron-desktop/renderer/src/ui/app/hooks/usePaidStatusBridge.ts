@@ -4,7 +4,8 @@ import { authActions, fetchBalance } from "@store/slices/auth/authSlice";
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
 import { addToast } from "@shared/toast";
 
-const TOPUP_POLL_DELAYS_MS = [0, 200, 500, 1000, 1000, 3000, 5000, 5000, 5000];
+// ~2 min total: first minute every 2s, second minute every 5s
+const TOPUP_POLL_DELAYS_MS = [...Array<number>(30).fill(2000), ...Array<number>(12).fill(5000)];
 
 export function usePaidStatusBridge(): void {
   const dispatch = useAppDispatch();
@@ -47,29 +48,41 @@ export function usePaidStatusBridge(): void {
 
     const pollBalance = async () => {
       const previousRemaining = balanceRef.current?.remaining ?? null;
+      dispatch(authActions.setBalancePolling(true));
 
-      for (const delay of TOPUP_POLL_DELAYS_MS) {
-        if (cancelled) return;
-        if (delay > 0) {
-          await new Promise<void>((resolve) => {
-            pollTimer = setTimeout(resolve, delay);
-          });
-        }
-        if (cancelled) return;
+      try {
+        for (const delay of TOPUP_POLL_DELAYS_MS) {
+          if (cancelled) return;
+          if (delay > 0) {
+            await new Promise<void>((resolve) => {
+              pollTimer = setTimeout(resolve, delay);
+            });
+          }
+          if (cancelled) return;
 
-        try {
-          const result = await dispatch(fetchBalance()).unwrap();
-          if (previousRemaining === null || result.remaining > previousRemaining) {
+          // Check if balance was already updated externally (e.g. background refresh)
+          const current = balanceRef.current?.remaining ?? null;
+          if (previousRemaining !== null && current !== null && current > previousRemaining) {
             addToast("Balance updated!");
             return;
           }
-        } catch {
-          // transient error — keep retrying
+
+          try {
+            const result = await dispatch(fetchBalance()).unwrap();
+            if (previousRemaining === null || result.remaining > previousRemaining) {
+              addToast("Balance updated!");
+              return;
+            }
+          } catch {
+            // transient error — keep retrying
+          }
         }
+        // Stripe confirmed success but backend hasn't reflected it yet;
+        // the periodic background refresh will pick it up shortly.
+        addToast("Balance is being updated...");
+      } finally {
+        dispatch(authActions.setBalancePolling(false));
       }
-      // Stripe confirmed success but backend hasn't reflected it yet;
-      // the periodic background refresh will pick it up shortly.
-      addToast("Balance is being updated...");
     };
 
     const unsub = api.onDeepLink((payload) => {
@@ -81,6 +94,7 @@ export function usePaidStatusBridge(): void {
     return () => {
       cancelled = true;
       if (pollTimer) clearTimeout(pollTimer);
+      dispatch(authActions.setBalancePolling(false));
       unsub();
     };
   }, [dispatch]);

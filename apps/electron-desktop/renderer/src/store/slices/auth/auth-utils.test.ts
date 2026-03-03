@@ -169,6 +169,7 @@ describe("resetAuthFields", () => {
       refreshFailureCount: 3,
       topUpPending: true,
       topUpError: "top-up-err",
+      balancePolling: true,
       autoTopUp: {
         enabled: false,
         thresholdUsd: 8,
@@ -204,6 +205,7 @@ describe("resetAuthFields", () => {
     expect(state.refreshFailureCount).toBe(0);
     expect(state.topUpPending).toBe(false);
     expect(state.topUpError).toBeNull();
+    expect(state.balancePolling).toBe(false);
     expect(state.autoTopUp).toEqual(DEFAULT_AUTO_TOP_UP_SETTINGS);
     expect(state.autoTopUpLoading).toBe(false);
     expect(state.autoTopUpSaving).toBe(false);

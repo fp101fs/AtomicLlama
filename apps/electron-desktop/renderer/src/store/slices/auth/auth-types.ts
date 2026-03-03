@@ -37,6 +37,7 @@ export type AuthSliceState = {
   refreshFailureCount: number;
   topUpPending: boolean;
   topUpError: string | null;
+  balancePolling: boolean;
   autoTopUp: AutoTopUpState;
   autoTopUpLoading: boolean;
   autoTopUpSaving: boolean;
