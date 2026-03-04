@@ -52,7 +52,7 @@
 }
 
 .triggerPlaceholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255);
 }
 
 .triggerBadge {
@@ -63,7 +63,7 @@
   width: 12px;
   height: 12px;
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255);
   transition: transform 0.15s ease;
 }
 
@@ -87,12 +87,59 @@
     0 2px 8px rgba(0, 0, 0, 0.25);
   padding: 0 4px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdownSearch {
+  flex-shrink: 0;
+  padding: 6px 10px 4px 4px;
+}
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255);
+}
+
+/* Hide native search clear button (WebKit/Blink) */
+.searchInput::-webkit-search-cancel-button {
+  display: none;
+}
+
+.dropdownEmpty {
+  padding: 12px 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  margin-top: 65px;
+  margin-left: 8px;
 }
 
 .dropdownInner {
+  flex: 1;
   max-height: 200px;
+  min-height: 200px;
   overflow-y: auto;
   padding: 4px 0;
+}
+
+.dropdownList {
+  padding-right: 4px;
 }
 
 /* ── Option item ─────────────────────────────────────── */
@@ -153,9 +200,9 @@
 
 .optionBadge {
   flex-shrink: 0;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  padding: 0 5px;
+  padding: 2px 5px;
   border-radius: var(--radius-full, 100px);
   line-height: 14px;
   white-space: nowrap;

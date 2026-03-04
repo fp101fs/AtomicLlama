@@ -79,7 +79,7 @@
 }
 
 .UiPrimaryButton:disabled {
-  background: #ffffff12;
+  background: #ffffff12 !important;
   cursor: default;
   color: #ffffff80;
 }

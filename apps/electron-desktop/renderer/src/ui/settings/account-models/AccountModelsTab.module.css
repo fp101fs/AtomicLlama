@@ -105,7 +105,7 @@
 
 .noModelsHint {
   font-size: 13px;
-  color: rgba(255, 179, 0, 0.8);
+  color: rgb(255, 255, 255);
   line-height: 1.5;
   margin-bottom: 16px;
 }

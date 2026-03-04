@@ -121,6 +121,10 @@ export function InlineApiKey(props: {
   }, [draftToken, provider.id, props]);
 
   const handleSave = () => {
+    if (!currentDraft.trim()) {
+      setValidationError("Please enter your token to continue");
+    }
+
     if (authMode === "setup_token") {
       void handleSaveSetupToken();
     } else {
@@ -293,7 +297,7 @@ export function InlineApiKey(props: {
             </ActionButton>
             <ActionButton
               variant="primary"
-              disabled={isBusy || !currentDraft.trim()}
+              disabled={isBusy}
               loading={validating}
               onClick={handleSave}
             >

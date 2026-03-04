@@ -12,14 +12,13 @@
 import React from "react";
 
 import type { SubscriptionPriceInfo } from "@ipc/backendApi";
-import { PrimaryButton, Modal } from "@shared/kit";
+import { PrimaryButton, Modal, SplashLogo } from "@shared/kit";
 import { LogOutIcon } from "@shared/kit/icons";
 import { AutoTopUpControl } from "@shared/billing/AutoTopUpControl";
 import { AnimatedBalance } from "@shared/billing/AnimatedBalance";
 import { addToastError } from "@shared/toast";
 
 import googleIcon from "@assets/set-up-skills/Google.svg";
-import logoIcon from "@assets/icon-sm.png";
 import s from "./AccountTab.module.css";
 import { useAccountState } from "./useAccountState";
 
@@ -104,7 +103,7 @@ function SignUpPrompt(props: { onContinueWithGoogle: () => void }) {
       <div className={s.signUpCard}>
         <div className={s.signUpRow}>
           <div className={s.signUpIcon}>
-            <img src={logoIcon} alt="" width={28} height={28} />
+            <SplashLogo iconAlt="Atomic Bot" size={28} />
           </div>
           <div className={s.signUpBody}>
             <div className={s.signUpTitleRow}>
@@ -155,7 +154,7 @@ function SubscribePrompt(props: {
       <div className={s.promoCard}>
         <div className={s.promoHeader}>
           <div className={s.promoIconWrap}>
-            <img src={logoIcon} alt="" width={24} height={24} />
+            <SplashLogo iconAlt="Atomic Bot" size={24} />
           </div>
           <div>
             <h3 className={s.promoTitle}>Atomic Bot Subscription</h3>

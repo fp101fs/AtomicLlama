@@ -151,5 +151,4 @@
   margin-right: 0;
   border-color: color-mix(in srgb, var(--surface-primary) 25%, transparent);
   border-top-color: var(--surface-primary);
-  transform: translateY(-1px);
 }
