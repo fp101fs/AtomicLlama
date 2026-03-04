@@ -56,6 +56,12 @@
   margin-bottom: 18px;
 }
 
+.balanceRow {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .balanceAmount {
   font-size: 36px;
   font-weight: 700;
@@ -148,13 +154,6 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.infoIcon {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.35);
-  cursor: help;
-  user-select: none;
 }
 
 .statsRow {
@@ -459,18 +458,13 @@
 
 .signUpCard {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 14px;
   padding: 16px;
   border-radius: var(--radius-lg, 14px);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.signUpRow {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
 }
 
 .signUpIcon {
@@ -491,26 +485,9 @@
 .signUpBody {
   flex: 1;
   min-width: 0;
-}
-
-.signUpTitleRow {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 3px;
-}
-
-.signUpBadge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent, #ff9500);
-  padding: 1px 7px;
-  border-radius: 8px;
-  background: rgba(255, 149, 0, 0.12);
-  white-space: nowrap;
-  flex-shrink: 0;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .signUpTitle {

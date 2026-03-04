@@ -12,15 +12,15 @@
 import React from "react";
 
 import type { SubscriptionPriceInfo } from "@ipc/backendApi";
-import { PrimaryButton, Modal, SplashLogo } from "@shared/kit";
+import { PrimaryButton, Modal, SplashLogo, InfoTooltip } from "@shared/kit";
 import { LogOutIcon } from "@shared/kit/icons";
 import { AutoTopUpControl } from "@shared/billing/AutoTopUpControl";
 import { AnimatedBalance } from "@shared/billing/AnimatedBalance";
 import { addToastError } from "@shared/toast";
+import { useAccountState } from "./useAccountState";
 
 import googleIcon from "@assets/set-up-skills/Google.svg";
 import s from "./AccountTab.module.css";
-import { useAccountState } from "./useAccountState";
 
 function formatDollars(n: number): string {
   return `$${n.toFixed(2)}`;
@@ -101,19 +101,15 @@ function SignUpPrompt(props: { onContinueWithGoogle: () => void }) {
   return (
     <div className={s.root}>
       <div className={s.signUpCard}>
-        <div className={s.signUpRow}>
-          <div className={s.signUpIcon}>
-            <SplashLogo iconAlt="Atomic Bot" size={28} />
-          </div>
-          <div className={s.signUpBody}>
-            <div className={s.signUpTitleRow}>
-              <h3 className={s.signUpTitle}>Atomic Bot Subscription</h3>
-              <span className={s.signUpBadge}>Popular</span>
-            </div>
-            <p className={s.signUpHint}>
-              No API keys needed · Auto credit management · Billed monthly
-            </p>
-          </div>
+        <div className={s.signUpIcon}>
+          <SplashLogo iconAlt="Atomic Bot" size={28} />
+        </div>
+
+        <div className={s.signUpBody}>
+          <h3 className={s.signUpTitle}>Atomic Bot Subscription</h3>
+          <p className={s.signUpHint}>
+            No API keys needed · Auto credit management · Billed monthly
+          </p>
         </div>
         <button type="button" className={s.googleBtn} onClick={props.onContinueWithGoogle}>
           <img src={googleIcon} alt="" width={18} height={18} />
@@ -216,17 +212,18 @@ function BalanceDashboard(props: {
           >
             {showRedBalance ? "$0" : <AnimatedBalance value={remaining} />}
           </span>
-          {st.balancePolling ? (
-            <span className={s.balancePollingHint}>
-              <span className={s.balancePollingSpinner} aria-hidden="true" />
-              Updating...
-            </span>
-          ) : (
-            <span className={s.balanceLabel}>Remaining credits</span>
-          )}
-          <span className={s.infoIcon} title="Credits remaining on your plan">
-            &#9432;
-          </span>
+
+          <div className={s.balanceRow}>
+            {st.balancePolling ? (
+              <span className={s.balancePollingHint}>
+                <span className={s.balancePollingSpinner} aria-hidden="true" />
+                Updating...
+              </span>
+            ) : (
+              <span className={s.balanceLabel}>Remaining credits</span>
+            )}
+            <InfoTooltip text="Credits remaining on your plan" />
+          </div>
         </div>
 
         {subscriptionExpired && (
