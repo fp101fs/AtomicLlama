@@ -363,7 +363,8 @@
   padding: 8px 18px;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity var(--transition-base, 150ms ease);
+  transition: opacity 150ms ease;
+  width: 105px;
 }
 
 .topUpButton:hover {
