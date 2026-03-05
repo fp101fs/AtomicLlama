@@ -548,6 +548,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: opacity 140ms ease;
+  width: 200px;
 }
 
 .googleBtn:hover {

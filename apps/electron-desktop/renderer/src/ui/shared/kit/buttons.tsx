@@ -51,10 +51,10 @@ export function ActionButton(props: {
 }) {
   const variant = props.variant ?? "secondary";
   const className =
-    variant === "primary" ? "UiActionButton UiActionButton-primary" : "UiActionButton";
+    variant === "primary" ? "UiActionButton UiActionButton-primary " : "UiActionButton ";
   return (
     <button
-      className={className}
+      className={className + props.className}
       disabled={props.disabled || props.loading}
       onClick={props.onClick}
     >
