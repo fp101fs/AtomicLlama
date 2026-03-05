@@ -84,7 +84,7 @@ describe("SubscriptionPromoBannerSource", () => {
   it("shows banner after 5 seconds when mode is self-managed", () => {
     render(<TestHarness />);
     act(() => vi.advanceTimersByTime(5000));
-    expect(screen.getByText("Subscription mode added for easy API Key management")).toBeTruthy();
+    expect(screen.getByText("Forget your API keys")).toBeTruthy();
     expect(screen.getByText("Try now")).toBeTruthy();
   });
 
@@ -92,14 +92,14 @@ describe("SubscriptionPromoBannerSource", () => {
     mockAuthState.mode = "paid";
     render(<TestHarness />);
     act(() => vi.advanceTimersByTime(5000));
-    expect(screen.queryByText("Subscription mode added for easy API Key management")).toBeNull();
+    expect(screen.queryByText("Forget your API keys")).toBeNull();
   });
 
   it("shows banner when mode is null (e.g. old backup without mode)", () => {
     mockAuthState.mode = null;
     render(<TestHarness />);
     act(() => vi.advanceTimersByTime(5000));
-    expect(screen.getByText("Subscription mode added for easy API Key management")).toBeTruthy();
+    expect(screen.getByText("Forget your API keys")).toBeTruthy();
   });
 
   it("dispatches switchToSubscription and navigates on Try now click", async () => {
@@ -117,10 +117,10 @@ describe("SubscriptionPromoBannerSource", () => {
   it("hides banner permanently when dismiss button is clicked", () => {
     render(<TestHarness />);
     act(() => vi.advanceTimersByTime(5000));
-    expect(screen.getByText("Subscription mode added for easy API Key management")).toBeTruthy();
+    expect(screen.getByText("Forget your API keys")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Dismiss banner/i }));
-    expect(screen.queryByText("Subscription mode added for easy API Key management")).toBeNull();
+    expect(screen.queryByText("Forget your API keys")).toBeNull();
 
     const dismissed = JSON.parse(localStorage.getItem("banner-dismissed") ?? "[]");
     expect(dismissed).toContain("subscription-promo");
@@ -130,6 +130,6 @@ describe("SubscriptionPromoBannerSource", () => {
     localStorage.setItem("banner-dismissed", JSON.stringify(["subscription-promo"]));
     render(<TestHarness />);
     act(() => vi.advanceTimersByTime(5000));
-    expect(screen.queryByText("Subscription mode added for easy API Key management")).toBeNull();
+    expect(screen.queryByText("Forget your API keys")).toBeNull();
   });
 });

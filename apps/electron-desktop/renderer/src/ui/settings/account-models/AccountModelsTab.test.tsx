@@ -181,13 +181,16 @@ describe("AccountModelsTab (self-managed mode)", () => {
     expect(screen.getByText("Select provider first")).not.toBeNull();
   });
 
-  it("shows 'No models available' when provider selected but no models", () => {
+  it("shows 'Enter API key' placeholder when provider selected but no models", () => {
     mockProviderFilter = "openai";
     mockSortedModels = [];
 
     render(<AccountModelsTab {...defaultProps} />);
 
-    expect(screen.getByText("No models available")).not.toBeNull();
+    expect(screen.getByText("Enter API key to choose a model")).not.toBeNull();
+    expect(
+      screen.getByText("Add an API key below to load models for this provider.")
+    ).not.toBeNull();
   });
 
   it("shows InlineApiKey when provider is selected", () => {
@@ -204,7 +207,7 @@ describe("AccountModelsTab (self-managed mode)", () => {
 
     const toggle = screen.getByRole("radiogroup", { name: "Connection mode" });
     expect(toggle).not.toBeNull();
-    expect(screen.getByText("Atomic Bot API key")).not.toBeNull();
-    expect(screen.getByText("Own API key")).not.toBeNull();
+    expect(screen.getByText("Atomic Subscription")).not.toBeNull();
+    expect(screen.getByText("Your own API key")).not.toBeNull();
   });
 });

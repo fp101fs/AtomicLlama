@@ -57,8 +57,8 @@ export function SubscriptionPromoBannerSource() {
       id: BANNER_ID,
       variant: "info",
       icon: <SparkleIcon />,
-      title: "Subscription mode added for easy API Key management",
-      subtitle: "Read about it from our CEO",
+      title: "Forget your API keys",
+      subtitle: "Manage all models with one subscription",
       action: { label: "Try now", onClick: () => void handleTryNow() },
       dismissible: "persistent",
     };
