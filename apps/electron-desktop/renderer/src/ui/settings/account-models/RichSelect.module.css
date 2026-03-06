@@ -27,7 +27,7 @@
 }
 
 .trigger:hover {
-  background: rgba(255, 255, 255, 0.08);
+  opacity: 0.8;
 }
 
 .triggerDisabled {

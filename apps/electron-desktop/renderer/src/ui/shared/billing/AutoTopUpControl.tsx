@@ -121,7 +121,9 @@ export function AutoTopUpControl({
     }
   }, [monthlyCapUsd, onPatch, onError, settings.enabled, thresholdUsd, topupAmountUsd]);
 
-  const wrapperClassName = className ? `${s.root} glass-effect ${className}` : s.root;
+  const wrapperClassName = className
+    ? `${s.root} glass-effect ${className}`
+    : s.root + " glass-effect";
   const monthlyLimitText =
     settings.monthlyCapUsd === null
       ? "No monthly cap"
