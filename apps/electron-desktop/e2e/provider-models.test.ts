@@ -180,7 +180,8 @@ test.describe("Provider addition, model listing, and model switching", () => {
     for (let attempt = 0; attempt < 5; attempt++) {
       await modelTrigger.click();
       await page.waitForTimeout(500);
-      const listbox = page.locator('[role="listbox"]');
+      const listboxes = page.locator('[role="listbox"]');
+      const listbox = listboxes.last();
       if (await listbox.isVisible()) {
         const options = listbox.locator('[role="option"]');
         const count = await options.count();

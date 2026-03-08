@@ -93,7 +93,7 @@ test.describe("Settings page", () => {
     await modelTrigger.click();
     await page.waitForTimeout(500);
 
-    const listbox = page.locator('[role="listbox"]');
+    const listbox = page.locator('[role="listbox"]').last();
     await expect(listbox).toBeVisible({ timeout: 5_000 });
     const options = listbox.locator('[role="option"]');
     const count = await options.count();
@@ -109,8 +109,8 @@ test.describe("Settings page", () => {
     const modelBefore = getObj(defaultsBefore.model);
     const originalModel = modelBefore.primary;
 
-    // Select the second option (first non-active)
-    const nonActive = options.filter({ hasNot: page.locator('[aria-selected="true"]') }).first();
+    // Select the first non-selected option
+    const nonActive = listbox.locator('[role="option"]:not([aria-selected="true"])').first();
     await nonActive.click();
     await page.waitForTimeout(2_000);
 
