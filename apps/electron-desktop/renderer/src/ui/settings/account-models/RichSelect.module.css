@@ -27,10 +27,10 @@
 }
 
 .trigger:hover {
-  background: rgba(255, 255, 255, 0.08);
+  opacity: 0.8;
 }
 
-.trigger:disabled {
+.triggerDisabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -73,6 +73,28 @@
 
 /* ── Dropdown panel ──────────────────────────────────── */
 
+@keyframes dropdownOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dropdownClose {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
 .dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -89,6 +111,13 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transform-origin: top;
+  animation: dropdownOpen 0.15s ease forwards;
+}
+
+.dropdownClosing {
+  animation: dropdownClose 0.15s ease forwards;
+  pointer-events: none;
 }
 
 .dropdownSearch {
@@ -231,6 +260,11 @@
 .optionBadge--fast {
   background: rgba(52, 199, 89, 0.15);
   color: #34c759;
+}
+
+.optionBadge--privacy {
+  background: rgba(255, 179, 0, 0.15);
+  color: #ffb300;
 }
 
 .optionDescription {

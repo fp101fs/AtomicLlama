@@ -1,6 +1,6 @@
 export const SELF_FLOW = {
-  totalSteps: 5,
-  steps: { provider: 0, apiKey: 1, model: 2, skills: 3, connections: 4 },
+  totalSteps: 6,
+  steps: { auth: 0, provider: 1, apiKey: 2, model: 3, skills: 4, connections: 5 },
 } as const;
 
 export const PAID_FLOW = {

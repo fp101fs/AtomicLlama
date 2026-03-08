@@ -121,7 +121,9 @@ export function AutoTopUpControl({
     }
   }, [monthlyCapUsd, onPatch, onError, settings.enabled, thresholdUsd, topupAmountUsd]);
 
-  const wrapperClassName = className ? `${s.root} ${className}` : s.root;
+  const wrapperClassName = className
+    ? `${s.root} glass-effect ${className}`
+    : s.root + " glass-effect";
   const monthlyLimitText =
     settings.monthlyCapUsd === null
       ? "No monthly cap"
@@ -183,62 +185,78 @@ export function AutoTopUpControl({
         aria-label="Auto top up settings"
       >
         <div className={s.modalBody}>
-          <label className={s.fieldLabel} htmlFor="autoTopUpThreshold">
-            When credits are below
-          </label>
-          <div className={s.inputWrap}>
-            <span className={s.currency}>$</span>
-            <input
-              id="autoTopUpThreshold"
-              className={s.input}
-              type="number"
-              min={1}
-              step={0.01}
-              value={thresholdUsd}
-              onChange={(e) => setThresholdUsd(e.target.value)}
-              disabled={saving}
-            />
+          <div className={s.fieldColumn}>
+            <label className={s.fieldLabel} htmlFor="autoTopUpThreshold">
+              When credits are below
+            </label>
+            <div className={s.inputWrap}>
+              <span className={s.currency}>$</span>
+              <input
+                id="autoTopUpThreshold"
+                className={s.input}
+                type="number"
+                min={1}
+                step={0.01}
+                value={thresholdUsd}
+                onChange={(e) => setThresholdUsd(e.target.value)}
+                disabled={saving}
+              />
+            </div>
+            <div className="InputErrorMessageContainer">
+              {formErrors?.thresholdUsd && (
+                <div className="InputErrorMessage">{formErrors.thresholdUsd}</div>
+              )}
+            </div>
           </div>
-          {formErrors.thresholdUsd ? <InlineError>{formErrors.thresholdUsd}</InlineError> : null}
 
-          <label className={s.fieldLabel} htmlFor="autoTopUpAmount">
-            Purchase this amount
-          </label>
-          <div className={s.inputWrap}>
-            <span className={s.currency}>$</span>
-            <input
-              id="autoTopUpAmount"
-              className={s.input}
-              type="number"
-              min={5}
-              step={0.01}
-              value={topupAmountUsd}
-              onChange={(e) => setTopupAmountUsd(e.target.value)}
-              disabled={saving}
-            />
+          <div className={s.fieldColumn}>
+            <label className={s.fieldLabel} htmlFor="autoTopUpAmount">
+              Purchase this amount
+            </label>
+            <div className={s.inputWrap}>
+              <span className={s.currency}>$</span>
+              <input
+                id="autoTopUpAmount"
+                className={s.input}
+                type="number"
+                min={5}
+                step={0.01}
+                value={topupAmountUsd}
+                onChange={(e) => setTopupAmountUsd(e.target.value)}
+                disabled={saving}
+              />
+            </div>
+            <div className="InputErrorMessageContainer">
+              {formErrors?.topupAmountUsd && (
+                <div className="InputErrorMessage">{formErrors.topupAmountUsd}</div>
+              )}
+            </div>
           </div>
-          {formErrors.topupAmountUsd ? (
-            <InlineError>{formErrors.topupAmountUsd}</InlineError>
-          ) : null}
 
-          <label className={s.fieldLabel} htmlFor="autoTopUpMonthlyCap">
-            Monthly limit
-          </label>
-          <div className={s.inputWrap}>
-            <span className={s.currency}>$</span>
-            <input
-              id="autoTopUpMonthlyCap"
-              className={s.input}
-              type="number"
-              min={5}
-              step={0.01}
-              value={monthlyCapUsd}
-              onChange={(e) => setMonthlyCapUsd(e.target.value)}
-              placeholder="Unlimited"
-              disabled={saving}
-            />
+          <div className={s.fieldColumn}>
+            <label className={s.fieldLabel} htmlFor="autoTopUpMonthlyCap">
+              Monthly limit
+            </label>
+            <div className={s.inputWrap}>
+              <span className={s.currency}>$</span>
+              <input
+                id="autoTopUpMonthlyCap"
+                className={s.input}
+                type="number"
+                min={5}
+                step={0.01}
+                value={monthlyCapUsd}
+                onChange={(e) => setMonthlyCapUsd(e.target.value)}
+                placeholder="Unlimited"
+                disabled={saving}
+              />
+            </div>
+            <div className="InputErrorMessageContainer">
+              {formErrors?.monthlyCapUsd && (
+                <div className="InputErrorMessage">{formErrors.monthlyCapUsd}</div>
+              )}
+            </div>
           </div>
-          {formErrors.monthlyCapUsd ? <InlineError>{formErrors.monthlyCapUsd}</InlineError> : null}
 
           <div className={s.modalActions}>
             <PrimaryButton

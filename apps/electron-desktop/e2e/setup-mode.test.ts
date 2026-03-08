@@ -30,7 +30,7 @@ test.describe("Setup mode selection page", () => {
     await acceptConsentOnly(page);
     await waitForSetupModePage(page);
 
-    await expect(page.getByText("Choose option to set up")).toBeVisible();
+    await expect(page.getByText("Set up your AI agent")).toBeVisible();
   });
 
   test("shows paid option with Popular badge and Google button", async () => {
@@ -67,6 +67,6 @@ test.describe("Setup mode selection page", () => {
     await container.getByRole("button", { name: "Back" }).click();
 
     await waitForSetupModePage(page);
-    await expect(page.getByText("Choose option to set up")).toBeVisible();
+    await expect(page.getByText("Set up your AI agent")).toBeVisible();
   });
 });

@@ -32,7 +32,7 @@ export function CheckIcon() {
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path
         d="M19.1333 7L8.59292 17.6L5 13.9867"
-        stroke="#8B8B8B"
+        stroke="currentColor"
         strokeOpacity="1"
         strokeWidth="2.06111"
         strokeLinecap="round"

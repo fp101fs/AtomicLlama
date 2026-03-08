@@ -69,7 +69,7 @@ export class Win32Platform implements Platform {
       detached: false,
       // --force relies on lsof which is unavailable on Windows.
       extraArgs: [] as string[],
-      startupTimeoutMs: 120_000,
+      startupTimeoutMs: 300_000,
     };
   }
 

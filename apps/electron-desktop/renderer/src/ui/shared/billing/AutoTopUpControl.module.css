@@ -145,8 +145,13 @@
   gap: 8px;
 }
 
+.fieldColumn {
+  display: flex;
+  flex-direction: column;
+}
+
 .fieldLabel {
-  margin-top: 6px;
+  margin-bottom: 6px;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.9);
 }

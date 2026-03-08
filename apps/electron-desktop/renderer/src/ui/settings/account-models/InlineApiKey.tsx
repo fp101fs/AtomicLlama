@@ -8,7 +8,7 @@
 import React from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
-import { ActionButton, TextInput, Modal } from "@shared/kit";
+import { ActionButton, TextInput, Modal, CheckIcon } from "@shared/kit";
 import { openExternal } from "@shared/utils/openExternal";
 import type { ModelProviderInfo, ModelProvider } from "@shared/models/providers";
 import { OAuthModalContent } from "../providers/OAuthModalContent";
@@ -122,7 +122,7 @@ export function InlineApiKey(props: {
 
   const handleSave = () => {
     if (!currentDraft.trim()) {
-      setValidationError("Please enter your token to continue");
+      setValidationError("Enter API key to continue");
     }
 
     if (authMode === "setup_token") {
@@ -176,9 +176,18 @@ export function InlineApiKey(props: {
       <div className={s.apiKeyLabel}>API Key</div>
 
       {configured && !editing ? (
-        <div className={s.apiKeyConfiguredRow}>
-          <span className={s.apiKeyConfiguredBadge}>API key configured</span>
-          <ActionButton onClick={() => setEditing(true)}>Edit</ActionButton>
+        <div className={s.apiKeyConfiguredCard}>
+          <div className={s.apiKeyConfiguredIcon}>
+            <CheckIcon />
+          </div>
+
+          <div className={s.apiKeyConfiguredBody}>
+            <h3 className={s.apiKeyConfiguredTitle}>API key configured</h3>
+            <p className={s.apiKeyConfiguredHint}>You can edit your API key settings</p>
+          </div>
+          <ActionButton onClick={() => setEditing(true)} className={s.apiKeyConfiguredButton}>
+            Edit
+          </ActionButton>
         </div>
       ) : null}
 

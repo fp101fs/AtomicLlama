@@ -31,74 +31,83 @@ export function SetupModePage(props: {
       <GlassCard className={`UiGlassCardOnboarding ${s.UiSetupModeCard}`}>
         <OnboardingDots totalSteps={props.totalSteps} activeStep={props.activeStep} />
 
-        <div className="UiSectionTitle">Choose option to set up</div>
-        <div className="UiSectionSubtitle">
-          Choose how you want to set up your OpenClaw. You can change configuration later.
-        </div>
-
-        <div className={s.UiSetupModeOptions}>
-          <div
-            className={`${s.UiSetupModeOption} ${selected === "paid" ? s.UiSetupModeOptionSelected : ""}`}
-          >
-            <div className={s.UiSetupModeIconRow}>
-              <div className={s.UiSetupModeIcon}>
-                <SplashLogo iconAlt="Atomic Bot" size={35} />
-              </div>
-              <span className={s.UiSetupModeBadge}>Popular 🔥</span>
+        <div className="UiSectionContent">
+          <div>
+            <div className="UiSectionTitle">Set up your AI agent</div>
+            <div className="UiSectionSubtitle">
+              Choose how you'd like to set up your OpenClaw. You can change this later.
             </div>
-            <div className={s.UiSetupModeTitle}>Do everything for me</div>
-            <div className={s.UiSetupModeDesc}>Billed monthly</div>
-            <ul className={s.UiSetupModeFeatures}>
-              <li>One-click setup with Google</li>
-              <li>No API keys needed</li>
-              <li>Auto credit management</li>
-            </ul>
-            <PrimaryButton
-              size="sm"
-              className={s.UiGoogleButton}
-              disabled={props.authBusy}
-              onClick={() => {
-                if (props.onStartGoogleAuth) {
-                  props.onStartGoogleAuth();
-                  setSelected("paid");
-                } else {
-                  props.onSelect("paid");
-                  setSelected("paid");
-                }
-              }}
-            >
-              {props.authBusy ? (
-                <span className={`UiButtonSpinner ${s.UiGoogleButtonSpinner}`} aria-hidden="true" />
-              ) : (
-                <img src={googleIcon} alt="" width={18} height={18} />
-              )}
-              Continue with Google
-            </PrimaryButton>
-            {props.authError ? <div className="UiErrorText">{props.authError}</div> : null}
           </div>
 
-          <div
-            className={`${s.UiSetupModeOption} ${selected === "self-managed" ? s.UiSetupModeOptionSelected : ""}`}
-          >
-            <div className={s.UiSetupModeIcon}>
-              <img src={cursorIcon} alt="" width={35} height={35} />
+          <div className={s.UiSetupModeOptions}>
+            <div className="UiSectionCard UiSectionCardGreen">
+              <div>
+                <div className={s.UiSetupModeIconRow}>
+                  <div className={s.UiSetupModeIcon}>
+                    <SplashLogo iconAlt="Atomic Bot" size={35} />
+                  </div>
+                  <span className={s.UiSetupModeBadge}>Popular 🔥</span>
+                </div>
+                <div className={s.UiSetupModeTitle}>Do everything for me</div>
+                <div className={s.UiSetupModeDesc}>Billed monthly</div>
+                <ul className={s.UiSetupModeFeatures}>
+                  <li>One-click setup</li>
+                  <li>Access to 100+ AI models</li>
+                  <li>Automatic credit management</li>
+                </ul>
+              </div>
+
+              <PrimaryButton
+                size="sm"
+                className={s.UiGoogleButton}
+                disabled={props.authBusy}
+                onClick={() => {
+                  if (props.onStartGoogleAuth) {
+                    props.onStartGoogleAuth();
+                    setSelected("paid");
+                  } else {
+                    props.onSelect("paid");
+                    setSelected("paid");
+                  }
+                }}
+              >
+                {props.authBusy ? (
+                  <span
+                    className={`UiButtonSpinner ${s.UiGoogleButtonSpinner}`}
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <img src={googleIcon} alt="" width={18} height={18} />
+                )}
+                Continue with Google
+              </PrimaryButton>
+              {props.authError ? <div className="UiErrorText">{props.authError}</div> : null}
             </div>
-            <div className={s.UiSetupModeTitle}>Manual setup</div>
-            <div className={s.UiSetupModeDesc}>Free with your own API Keys</div>
-            <ul className={s.UiSetupModeFeatures}>
-              <li>Use your own provider keys</li>
-              <li>Full model provider choice</li>
-              <li>No payment required</li>
-            </ul>
-            <SecondaryButton
-              size="sm"
-              onClick={() => {
-                props.onSelect("self-managed");
-                setSelected("self-managed");
-              }}
-            >
-              Continue with API key
-            </SecondaryButton>
+
+            <div className="UiSectionCard">
+              <div>
+                <div className={s.UiSetupModeIcon}>
+                  <img src={cursorIcon} alt="" width={35} height={35} />
+                </div>
+                <div className={s.UiSetupModeTitle}>Manual setup</div>
+                <div className={s.UiSetupModeDesc}>Free with your own API Keys</div>
+                <ul className={s.UiSetupModeFeatures}>
+                  <li>Use your own API keys</li>
+                  <li>Full control over models</li>
+                  <li>No subscription required</li>
+                </ul>
+              </div>
+
+              <SecondaryButton
+                size="sm"
+                onClick={() => {
+                  props.onSelect("self-managed");
+                  setSelected("self-managed");
+                }}
+              >
+                Set up with API keys
+              </SecondaryButton>
+            </div>
           </div>
         </div>
       </GlassCard>

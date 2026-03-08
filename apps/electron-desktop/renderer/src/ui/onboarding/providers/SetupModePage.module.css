@@ -11,6 +11,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 16px;
+  height: 100%;
 }
 
 .UiSetupModeOption {
@@ -37,7 +38,8 @@
 
 .UiSetupModeIconRow {
   display: flex;
-  align-items: center;
+  align-items: start;
+  justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -80,13 +82,13 @@
   font-weight: 700;
   font-size: 17px;
   line-height: 22px;
-  margin-bottom: 2px;
+  margin-bottom: 8px;
 }
 
 .UiSetupModeDesc {
   font-size: 13px;
   color: var(--muted3);
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .UiSetupModeFeatures {
@@ -95,14 +97,13 @@
   margin: 0 0 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
   flex: 1;
 }
 
 .UiSetupModeFeatures li {
   font-size: 13px;
   line-height: 18px;
-  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 6px;

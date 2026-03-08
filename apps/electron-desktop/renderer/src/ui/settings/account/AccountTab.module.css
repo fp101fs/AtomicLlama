@@ -4,7 +4,16 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 600px;
+  animation: fadeIn ease 0.2s;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* ── Balance card ── */
@@ -22,11 +31,30 @@
   margin-bottom: 16px;
 }
 
-.balanceTitle {
+.balanceTitle,
+.loadingTitle {
   font-size: 15px;
   font-weight: 600;
   margin: 0;
   color: var(--text, #fff);
+}
+
+.loadingCard {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md, 12px);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.loadingSubtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 18px;
+  margin: 0;
 }
 
 .manageLink {
@@ -169,6 +197,17 @@
   background: rgba(255, 255, 255, 0.04);
   border-radius: var(--radius-md, 10px);
   padding: 14px;
+
+  background:
+    linear-gradient(#323232, #323232) padding-box,
+    linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.24) 0%,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(255, 255, 255, 0.24) 100%
+      )
+      border-box;
+  border: 1px solid transparent;
 }
 
 .statLabel {
@@ -335,7 +374,8 @@
   padding: 8px 18px;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity var(--transition-base, 150ms ease);
+  transition: opacity 150ms ease;
+  width: 105px;
 }
 
 .topUpButton:hover {
@@ -520,6 +560,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: opacity 140ms ease;
+  width: 200px;
 }
 
 .googleBtn:hover {

@@ -123,12 +123,12 @@ function SignUpPrompt(props: { onContinueWithGoogle: () => void }) {
 function PaymentPendingCard(props: { subscribePaymentPending: boolean; footer: React.ReactNode }) {
   return (
     <div className={s.root}>
-      <div className={s.subscribeCard}>
+      <div className={s.loadingCard}>
         <span className="UiButtonSpinner" aria-hidden="true" />
-        <h3 className={s.subscribeTitle}>
+        <h3 className={s.loadingTitle}>
           {props.subscribePaymentPending ? "Waiting for payment..." : "Setting up your account..."}
         </h3>
-        <p className={s.subscribeHint}>
+        <p className={s.loadingSubtitle}>
           {props.subscribePaymentPending
             ? "Complete the checkout in your browser, then return here."
             : "Provisioning your API keys. This may take a moment."}
@@ -193,7 +193,7 @@ function BalanceDashboard(props: {
 
   return (
     <div className={s.root}>
-      <div className={s.balanceCard}>
+      <div className={s.balanceCard + " glass-effect"}>
         <div className={s.balanceHeader}>
           <h3 className={s.balanceTitle}>Balance</h3>
           <button
@@ -320,8 +320,37 @@ function BalanceDashboard(props: {
 
 // ── Main component ────────────────────────────────────────────────
 
+function AccountLoadingCard() {
+  return (
+    <div className={s.root}>
+      <div className={s.loadingCard}>
+        <span className="UiButtonSpinner" aria-hidden="true" />
+        <h3 className={s.loadingTitle}>Loading account…</h3>
+        <p className={s.loadingSubtitle}>Fetching subscription and balance.</p>
+      </div>
+    </div>
+  );
+}
+
 export function AccountTab() {
   const state = useAccountState();
+  const [authChecked, setAuthChecked] = React.useState(false);
+
+  React.useEffect(() => {
+    setAuthChecked(true);
+  }, []);
+
+  // Keep loader until we have at least one status response to avoid flicker when authChecked flips.
+  const showLoader =
+    state.mode === "paid" &&
+    (!authChecked ||
+      (state.jwt && state.loading) ||
+      (state.jwt && state.lastRefreshAt === null) ||
+      (state.jwt && state.needsSubscription && state.subscriptionPrice === null));
+
+  if (showLoader) {
+    return <AccountLoadingCard />;
+  }
 
   const footer = state.jwt ? (
     <AccountFooter
@@ -361,7 +390,7 @@ export function AccountTab() {
 
   return (
     <div className={s.root}>
-      <div className={s.balanceCard}>
+      <div className={s.balanceCard + " glass-effect"}>
         <h3 className={s.balanceTitle}>Account</h3>
         <p className={s.selfManagedHint}>
           You are in self-managed mode. Switch to subscription in the Other tab to use managed AI
