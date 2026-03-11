@@ -10,7 +10,7 @@
 import React, { useState } from "react";
 
 import { useAppDispatch, useAppSelector } from "@store/hooks";
-import { switchToSubscription, switchToSelfManaged, SetupMode } from "@store/slices/auth/authSlice";
+import { switchToSubscription, switchToSelfManaged } from "@store/slices/auth/authSlice";
 import { reloadConfig, type ConfigData } from "@store/slices/configSlice";
 import { addToastError } from "@shared/toast";
 
@@ -25,6 +25,7 @@ import { useModelProvidersState } from "../providers/useModelProvidersState";
 import { AccountTab } from "../account/AccountTab";
 import { RichSelect, type RichOption } from "./RichSelect";
 import { InlineApiKey } from "./InlineApiKey";
+import { OllamaTab } from "./OllamaTab";
 import { useAccountState } from "@ui/settings/account/useAccountState";
 
 import s from "./AccountModelsTab.module.css";
@@ -51,17 +52,19 @@ function providerBadge(p: (typeof MODEL_PROVIDERS)[number]):
   return undefined;
 }
 
+type TabMode = "paid" | "self-managed" | "ollama";
+
 function ConnectionToggle(props: {
-  isPaid: boolean;
+  mode: TabMode;
   disabled: boolean;
-  onSelect: (mode: "paid" | "self-managed") => void;
+  onSelect: (mode: TabMode) => void;
 }) {
   return (
     <div className={s.connectionSection}>
       <div className={s.connectionSelector} role="radiogroup" aria-label="Connection mode">
         <button
           type="button"
-          className={`${s.connectionOption}${props.isPaid ? ` ${s["connectionOption--active"]}` : ""}`}
+          className={`${s.connectionOption}${props.mode === "paid" ? ` ${s["connectionOption--active"]}` : ""}`}
           onClick={() => void props.onSelect("paid")}
           disabled={props.disabled}
         >
@@ -69,11 +72,19 @@ function ConnectionToggle(props: {
         </button>
         <button
           type="button"
-          className={`${s.connectionOption}${!props.isPaid ? ` ${s["connectionOption--active"]}` : ""}`}
+          className={`${s.connectionOption}${props.mode === "self-managed" ? ` ${s["connectionOption--active"]}` : ""}`}
           onClick={() => void props.onSelect("self-managed")}
           disabled={props.disabled}
         >
           Your own API key
+        </button>
+        <button
+          type="button"
+          className={`${s.connectionOption}${props.mode === "ollama" ? ` ${s["connectionOption--active"]}` : ""}`}
+          onClick={() => void props.onSelect("ollama")}
+          disabled={props.disabled}
+        >
+          Ollama (Local)
         </button>
       </div>
     </div>
@@ -90,7 +101,7 @@ export function AccountModelsTab(props: {
   const accountState = useAccountState();
   const authMode = useAppSelector((st) => st.auth.mode);
   const isPaidMode = authMode === "paid";
-  const [tabMode, setTabMode] = useState<SetupMode | null>(authMode);
+  const [tabMode, setTabMode] = useState<TabMode>(authMode ?? "self-managed");
 
   const [modeSwitchBusy, setModeSwitchBusy] = React.useState(false);
 
@@ -98,6 +109,15 @@ export function AccountModelsTab(props: {
     ...props,
     isPaidMode,
   });
+
+  // Auto-switch to Ollama tab when the active model is an Ollama model (e.g. after reopening Settings)
+  const hasAutoSwitchedToOllama = React.useRef(false);
+  React.useEffect(() => {
+    if (!hasAutoSwitchedToOllama.current && state.activeModelId?.startsWith("ollama/")) {
+      hasAutoSwitchedToOllama.current = true;
+      setTabMode("ollama");
+    }
+  }, [state.activeModelId]);
 
   // Auto-select provider from current active model on first load (self-managed only)
   const autoSelectedRef = React.useRef(false);
@@ -189,17 +209,19 @@ export function AccountModelsTab(props: {
     [state.saveDefaultModel]
   );
 
-  // Auto-select first model when provider changes and current model doesn't belong to it
+  // Auto-select first model when provider changes and current model doesn't belong to it.
+  // Skip when Ollama tab is active — Ollama manages its own model selection.
   React.useEffect(() => {
     if (
       !isPaidMode &&
+      tabMode !== "ollama" &&
       selectedProvider &&
       modelOptions.length > 0 &&
       !modelOptions.some((opt) => opt.value === state.activeModelId)
     ) {
       handleModelChange(modelOptions[0]!.value);
     }
-  }, [isPaidMode, selectedProvider, modelOptions, state.activeModelId, handleModelChange]);
+  }, [isPaidMode, tabMode, selectedProvider, modelOptions, state.activeModelId, handleModelChange]);
 
   const handleOAuthSuccess = React.useCallback(() => {
     void props.reload();
@@ -210,8 +232,11 @@ export function AccountModelsTab(props: {
   // ── Mode switching ──
 
   const handleConnectionSelect = React.useCallback(
-    async (mode: "paid" | "self-managed") => {
+    async (mode: TabMode) => {
       setTabMode(mode);
+
+      // "ollama" is local-only — no auth mode switch needed
+      if (mode === "ollama") return;
 
       if ((mode === "paid") === isPaidMode) return;
 
@@ -266,12 +291,12 @@ export function AccountModelsTab(props: {
       <div className={s.title}>AI Models</div>
 
       <ConnectionToggle
-        isPaid={tabMode === "paid"}
+        mode={tabMode}
         disabled={modeSwitchBusy}
         onSelect={handleConnectionSelect}
       />
 
-      {canShowModels && (
+      {canShowModels && tabMode !== "ollama" && (
         <>
           <div className={s.dropdownGroup}>
             <div className={s.dropdownLabel}>Model</div>
@@ -292,7 +317,7 @@ export function AccountModelsTab(props: {
         </>
       )}
 
-      {!isPaidMode && !isLoading && (
+      {tabMode === "self-managed" && !isPaidMode && !isLoading && (
         <div className="fade-in">
           <div className={s.dropdownRow}>
             <div className={s.dropdownGroup}>
@@ -353,8 +378,19 @@ export function AccountModelsTab(props: {
         </div>
       )}
 
+      {/* Ollama (Local): discover and select local models */}
+      {tabMode === "ollama" && !modeSwitchBusy && (
+        <div className="fade-in">
+          <OllamaTab
+            gw={props.gw}
+            activeModelId={state.activeModelId ?? null}
+            reload={props.reload}
+          />
+        </div>
+      )}
+
       {/* Paid: account / billing content */}
-      {isPaidMode && !modeSwitchBusy && <AccountTab />}
+      {isPaidMode && tabMode !== "ollama" && !modeSwitchBusy && <AccountTab />}
     </div>
   );
 }

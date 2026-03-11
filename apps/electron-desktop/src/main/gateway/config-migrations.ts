@@ -183,6 +183,26 @@ export const DESKTOP_CONFIG_MIGRATIONS: ConfigMigration[] = [
       return changed;
     },
   },
+  {
+    version: 4,
+    description:
+      "Fix Ollama models with contextWindow below the hard minimum (was hardcoded 8192); reset to 128000",
+    apply: (cfg) => {
+      const ollama = asPlainObject(asPlainObject(asPlainObject(cfg.models)?.providers)?.ollama);
+      if (!ollama) return false;
+      const models = ollama.models;
+      if (!Array.isArray(models)) return false;
+
+      let changed = false;
+      for (const m of models) {
+        if (isPlainObject(m) && typeof m.contextWindow === "number" && m.contextWindow < 16000) {
+          m.contextWindow = 128000;
+          changed = true;
+        }
+      }
+      return changed;
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------

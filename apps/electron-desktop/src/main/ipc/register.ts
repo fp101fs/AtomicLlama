@@ -21,6 +21,7 @@ import { registerUpdaterIpcHandlers } from "./updater-ipc";
 import { registerSkillHandlers } from "./skills-ipc";
 import { registerBackupHandlers } from "./backup-ipc";
 import { registerDefenderHandlers } from "./defender-ipc";
+import { registerOllamaHandlers } from "./ollama-ipc";
 
 export { type RegisterParams } from "./types";
 
@@ -42,4 +43,5 @@ export function registerIpcHandlers(params: RegisterParams) {
   registerGogIpcHandlers(params);
   registerWhisperIpcHandlers(params);
   registerResetAndCloseIpcHandler(params);
+  registerOllamaHandlers();
 }

@@ -2,6 +2,7 @@ import { vi } from "vitest";
 
 // Global mocks for Electron-specific modules that are unavailable in a Node test environment.
 vi.mock("electron", () => import("./mocks/electron"));
+vi.mock("electron-updater", () => import("./mocks/electron-updater"));
 vi.mock("node-pty", () => import("./mocks/node-pty"));
 
 // Electron's process.resourcesPath is only defined in packaged apps.

@@ -95,6 +95,10 @@ export const IPC = {
   // Reset
   resetAndClose: "reset-and-close",
 
+  // Ollama (local LLM)
+  ollamaCheck: "ollama:check",
+  ollamaListModels: "ollama:list-models",
+
   // Terminal (PTY)
   terminalCreate: "terminal:create",
   terminalWrite: "terminal:write",

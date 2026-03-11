@@ -163,6 +163,10 @@ export interface OpenclawDesktopApi {
   onTerminalExit: (
     cb: (payload: { id: string; exitCode: number; signal?: number }) => void
   ) => () => void;
+  ollamaCheck: () => Promise<{ running: boolean }>;
+  ollamaListModels: () => Promise<{
+    models: Array<{ name: string; size: number; modified_at: string }>;
+  }>;
 }
 
 export const DESKTOP_BRIDGE_KEYS: ReadonlyArray<keyof OpenclawDesktopApi> = [
@@ -243,4 +247,6 @@ export const DESKTOP_BRIDGE_KEYS: ReadonlyArray<keyof OpenclawDesktopApi> = [
   "onDeepLink",
   "onTerminalData",
   "onTerminalExit",
+  "ollamaCheck",
+  "ollamaListModels",
 ];

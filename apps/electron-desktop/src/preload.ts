@@ -128,6 +128,8 @@ const api: OpenclawDesktopApi = {
     onIpc(IPC_EVENTS.terminalData, cb),
   onTerminalExit: (cb: (payload: { id: string; exitCode: number; signal?: number }) => void) =>
     onIpc(IPC_EVENTS.terminalExit, cb),
+  ollamaCheck: async () => ipcRenderer.invoke(IPC.ollamaCheck),
+  ollamaListModels: async () => ipcRenderer.invoke(IPC.ollamaListModels),
 };
 
 contextBridge.exposeInMainWorld("openclawDesktop", api);
