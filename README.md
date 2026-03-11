@@ -2,9 +2,9 @@
 
 <img src="apps/electron-desktop/assets/icon.png" alt="Atomic Bot" width="128">
 
-# Atomic Bot
+# Atomic Llama
 
-### Your personal AI assistant — right on your desktop.
+### Your personal AI assistant — right on your desktop. + OLLAMA
 
 Download. Install. Done. No terminal, no Homebrew, no dependencies to manage.
 
