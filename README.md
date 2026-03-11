@@ -5,7 +5,7 @@
 # Atomic Llama
 
 ### Your personal AI assistant — right on your desktop. 
-+ OLLAMA
+plus OLLAMA
 
 Download. Install. Done. No terminal, no Homebrew, no dependencies to manage.
 
